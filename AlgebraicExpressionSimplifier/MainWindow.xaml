@@ -1,0 +1,25 @@
+﻿<Window x:Class="AlgebraicExpressionSimplifier.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AlgebraicExpressionSimplifier"
+        mc:Ignorable="d"
+        Title="Algebraic Expression Simplifier &amp; Caculator" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <TextBox x:Name="epTextBox" Margin="8" Padding="8" TextWrapping="Wrap"/>
+        <Button x:Name="goBtn" Content="Go!" Margin="8" Padding="8" Grid.Column="1" Click="GoBtn_Click"/>
+        <TextBlock x:Name="resTextBlock" Margin="8" Padding="8" Grid.Row="2" Text="" TextWrapping="Wrap" Grid.ColumnSpan="2"/>
+        <Separator HorizontalAlignment="Stretch" Margin="8" Grid.Row="1" VerticalAlignment="Center" Grid.ColumnSpan="2"/>
+
+    </Grid>
+</Window>
