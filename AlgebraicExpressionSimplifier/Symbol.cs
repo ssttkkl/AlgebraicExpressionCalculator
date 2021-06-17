@@ -4,15 +4,17 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace AlgebraicExpressionSimplifier
 {
-    public struct Symbol : IExpressionContextHolder, IComparable<Symbol>, IEquatable<Symbol>
+    public class Symbol : IExpressionContextHolder<Symbol>, IComparable<Symbol>, IEquatable<Symbol>
     {
-        public int ID { get; }
         public string Name { get; }
         public ExpressionContext Context { get; }
-
-        internal Symbol(int id, string name, ExpressionContext context)
+        public IExpression Constraint
         {
-            ID = id;
+            get => Context.GetSymbolConstraint(this);
+        }
+
+        public Symbol(string name, ExpressionContext context)
+        {
             Name = name;
             Context = context;
         }
@@ -29,32 +31,29 @@ namespace AlgebraicExpressionSimplifier
 
         public int CompareTo([AllowNull] Symbol other)
         {
-            if (other != null)
-                return ID.CompareTo(other.ID);
-            else
-                return 1;
+            return other != null ? Name.CompareTo(other.Name) : 1;
         }
 
         public override bool Equals(object obj)
         {
-            return obj is Symbol symbol && Equals(symbol);
+            return Equals(obj as Symbol);
         }
 
         public bool Equals(Symbol other)
         {
-            return ID == other.ID &&
+            return other != null &&
                    Name == other.Name &&
                    EqualityComparer<ExpressionContext>.Default.Equals(Context, other.Context);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(ID, Name, Context);
+            return HashCode.Combine(Name, Context);
         }
 
         public static bool operator ==(Symbol left, Symbol right)
         {
-            return left.Equals(right);
+            return EqualityComparer<Symbol>.Default.Equals(left, right);
         }
 
         public static bool operator !=(Symbol left, Symbol right)

@@ -21,13 +21,12 @@ namespace AlgebraicExpressionSimplifier
                 throw new ArgumentException($"Illegal Operator: {op}");
         }
 
-        public static IExpression Parse(string text)
+
+        public static IExpression Parse(string text, ExpressionContext context)
         {
             // REF: https://www.cnblogs.com/bianchengzhuji/p/10679924.html
 
             List<(string, int)> elements = SplitText(text);
-
-            ExpressionContext context = new ExpressionContext();
 
             Stack<IExpression> eps = new Stack<IExpression>();
             Stack<string> ops = new Stack<string>();

@@ -7,24 +7,58 @@ namespace AlgebraicExpressionSimplifier
 {
     public static class ExpressionSimplifier
     {
-        public static IExpression Simplify(this ExpressionTree ep)
+        public static IExpression WithConstraint(this IExpression ep)
         {
-            var context = new ExpressionContext();
-            var substitution = new Dictionary<Symbol, IExpression>();
-            var poly = Polynomialize(ep.WithContext(context), substitution);
-            var ep2 = poly.BuildExpressionTree();
-            return RevertSubstitution(ep2, substitution);
+            if (ep is Polynomial poly)
+            {
+                ep = poly.BuildExpressionTree();
+                if (ep is Polynomial poly2)
+                {
+                    // poly2必为纯变量或纯数字
+                    if (poly2.TryGetAsSymbol(out var sy) && sy.Constraint != null)
+                    {
+                        return sy.Constraint;
+                    }
+                    else
+                    {
+                        return poly2;
+                    }
+                }
+            }
 
+            var tree = ep as ExpressionTree;
+            return new ExpressionTree(
+                    tree.Left.WithConstraint(),
+                    tree.Operation,
+                    tree.Right.WithConstraint(),
+                    tree.Context
+            );
+        }
+        public static IExpression Simplify(this IExpression ep)
+        {
+            if (ep is ExpressionTree tree)
+            {
+                var context = ep.Context;
+                var subContext = new ExpressionContext();
+                var substitution = new Dictionary<Symbol, IExpression>();
+                var poly = Polynomialize(ep.WithContext(subContext), subContext, substitution);
+                var ep2 = poly.BuildExpressionTree();
+                return RevertSubstitution(ep2, substitution).WithContext(context);
+            }
+            else
+            {
+                return ep;
+            }
         }
 
-        private static Polynomial Polynomialize(IExpression ep, IDictionary<Symbol, IExpression> substitution)
+        private static Polynomial Polynomialize(IExpression ep, ExpressionContext context, IDictionary<Symbol, IExpression> substitution)
         {
-            if (ep is Polynomial)
-                return (Polynomial)ep;
+            if (ep is Polynomial poly)
+                return poly;
 
             var tr = (ExpressionTree)ep;
-            Polynomial ep1 = Polynomialize(tr.Left, substitution);
-            Polynomial ep2 = Polynomialize(tr.Right, substitution);
+            Polynomial ep1 = Polynomialize(tr.Left, context, substitution);
+            Polynomial ep2 = Polynomialize(tr.Right, context, substitution);
 
             switch (tr.Operation)
             {
@@ -41,8 +75,8 @@ namespace AlgebraicExpressionSimplifier
                         return ep1 / num * new Polynomial(mono.Inv(), 1);
                     else
                     {
-                        ExpressionTree sub = new ExpressionTree(ep1, Operation.Divide, ep2, ep.Context);
-                        Symbol sy = ep.Context.Symbol(tr.ToString());
+                        ExpressionTree sub = new ExpressionTree(ep1, Operation.Divide, ep2, context);
+                        Symbol sy = tr.Context.Symbol(tr.ToString());
                         substitution[sy] = sub;
                         return new Polynomial(sy, 1);
                     }
@@ -51,8 +85,8 @@ namespace AlgebraicExpressionSimplifier
                         return ep1.Power((BigInteger)num);
                     else
                     {
-                        ExpressionTree sub = new ExpressionTree(ep1, Operation.Power, ep2, ep.Context);
-                        Symbol sy = ep.Context.Symbol(tr.ToString());
+                        ExpressionTree sub = new ExpressionTree(ep1, Operation.Power, ep2, context);
+                        Symbol sy = context.Symbol(tr.ToString());
                         substitution[sy] = sub;
                         return new Polynomial(sy, 1);
                     }
@@ -63,23 +97,22 @@ namespace AlgebraicExpressionSimplifier
 
         private static IExpression RevertSubstitution(IExpression ep, IDictionary<Symbol, IExpression> substitution)
         {
-            if (ep is Polynomial)
+            if (ep is Polynomial poly)
             {
-                var poly = (Polynomial)ep;
                 if (poly.TryGetAsSymbol(out Symbol sy) && substitution.TryGetValue(sy, out IExpression ans))
                     return ans;
                 else
                     return poly;
             }
-            else
+            else if (ep is ExpressionTree tree)
             {
-                var tree = (ExpressionTree)ep;
                 return new ExpressionTree(
                     RevertSubstitution(tree.Left, substitution),
                     tree.Operation,
                     RevertSubstitution(tree.Right, substitution),
                     tree.Context);
             }
+            throw new NotSupportedException();
         }
     }
 }

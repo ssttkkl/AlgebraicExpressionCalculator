@@ -3,14 +3,11 @@ using System.Collections.Generic;
 
 namespace AlgebraicExpressionSimplifier
 {
-    public class ExpressionTree : IExpression, IEquatable<ExpressionTree>
+    public class ExpressionTree : IExpression, IEquatable<ExpressionTree>, IExpressionContextHolder<ExpressionTree>
     {
         public ExpressionContext Context { get; }
-
         public IExpression Left { get; set; }
-
         public IExpression Right { get; set; }
-
         public Operation Operation { get; set; }
 
         public ExpressionTree(IExpression left, Operation operation, IExpression right, ExpressionContext context)
@@ -23,19 +20,14 @@ namespace AlgebraicExpressionSimplifier
 
         public ExpressionTree WithContext(ExpressionContext context)
         {
-            IExpression ep1;
-            if (Left is ExpressionTree)
-                ep1 = ((ExpressionTree)Left).WithContext(context);
-            else
-                ep1 = ((Polynomial)Left).WithContext(context);
-
-            IExpression ep2;
-            if (Right is ExpressionTree)
-                ep2 = ((ExpressionTree)Right).WithContext(context);
-            else
-                ep2 = ((Polynomial)Right).WithContext(context);
-
+            IExpression ep1 = Left.WithContext(context);
+            IExpression ep2 = Right.WithContext(context);
             return new ExpressionTree(ep1, Operation, ep2, context);
+        }
+
+        IExpression IExpressionContextHolder<IExpression>.WithContext(ExpressionContext context)
+        {
+            return WithContext(context);
         }
 
         public override string ToString()

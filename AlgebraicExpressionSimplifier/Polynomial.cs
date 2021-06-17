@@ -6,7 +6,7 @@ using System.Numerics;
 
 namespace AlgebraicExpressionSimplifier
 {
-    public class Polynomial : Dictionary<UnitMonomial, RationalNumber>, IExpression, IEquatable<Polynomial>
+    public class Polynomial : Dictionary<UnitMonomial, RationalNumber>, IExpression, IEquatable<Polynomial>, IExpressionContextHolder<Polynomial>
     {
         public ExpressionContext Context { get; }
 
@@ -57,6 +57,10 @@ namespace AlgebraicExpressionSimplifier
                 poly[item.Key.WithContext(context)] = item.Value;
             }
             return poly;
+        }
+        IExpression IExpressionContextHolder<IExpression>.WithContext(ExpressionContext context)
+        {
+            return WithContext(context);
         }
 
         public override bool Equals(object obj)
@@ -146,7 +150,7 @@ namespace AlgebraicExpressionSimplifier
         {
             if (Count != 1)
             {
-                symbol = new Symbol();
+                symbol = null;
                 return false;
             }
 
@@ -252,5 +256,6 @@ namespace AlgebraicExpressionSimplifier
             }
             return ans;
         }
+
     }
 }

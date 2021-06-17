@@ -4,8 +4,9 @@ using System.Linq;
 
 namespace AlgebraicExpressionSimplifier
 {
-    public interface IExpression : IExpressionContextHolder
+    public interface IExpression : IExpressionContextHolder<IExpression>
     {
+        
     }
 
     public static class ExpressionExt

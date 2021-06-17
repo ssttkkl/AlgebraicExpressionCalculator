@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace AlgebraicExpressionSimplifier
 {
-    public class UnitMonomial : SortedDictionary<Symbol, RationalNumber>, IEquatable<UnitMonomial>, IExpressionContextHolder
+    public class UnitMonomial : SortedDictionary<Symbol, RationalNumber>, IEquatable<UnitMonomial>, IExpressionContextHolder<UnitMonomial>
     {
         public ExpressionContext Context { get; }
 
@@ -90,7 +90,7 @@ namespace AlgebraicExpressionSimplifier
             return !(left == right);
         }
 
-        public static UnitMonomial operator*(UnitMonomial x, UnitMonomial y)
+        public static UnitMonomial operator *(UnitMonomial x, UnitMonomial y)
         {
             if (x.Context != y.Context)
                 throw new DifferentContextException();
@@ -135,7 +135,7 @@ namespace AlgebraicExpressionSimplifier
         {
             if (Count != 1)
             {
-                symbol = new Symbol();
+                symbol = null;
                 return false;
             }
 

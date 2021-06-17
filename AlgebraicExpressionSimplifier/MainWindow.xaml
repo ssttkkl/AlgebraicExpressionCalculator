@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AlgebraicExpressionSimplifier"
         mc:Ignorable="d"
-        Title="Algebraic Expression Simplifier &amp; Caculator" Height="450" Width="800">
-    <Grid>
+        Title="数学表达式计算器" Height="450" Width="800">
+    <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -14,12 +14,28 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="3*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="epTextBox" Margin="8" Padding="8" TextWrapping="Wrap"/>
-        <Button x:Name="goBtn" Content="Go!" Margin="8" Padding="8" Grid.Column="1" Click="GoBtn_Click"/>
-        <TextBlock x:Name="resTextBlock" Margin="8" Padding="8" Grid.Row="2" Text="" TextWrapping="Wrap" Grid.ColumnSpan="2"/>
-        <Separator HorizontalAlignment="Stretch" Margin="8" Grid.Row="1" VerticalAlignment="Center" Grid.ColumnSpan="2"/>
+        <TextBox x:Name="epTextBox" Margin="8,8,8,8" Padding="8" TextWrapping="Wrap" Grid.Column="1"/>
+        <Button x:Name="goBtn" Content="Go!" Margin="8,8,8,8" Padding="8" Grid.Column="2" Click="GoBtn_Click" IsDefault="True"/>
+        <TextBlock x:Name="resTextBlock" Margin="8,8,8,8" Padding="8" Grid.Row="2" Text="" TextWrapping="Wrap" Grid.ColumnSpan="2" Grid.Column="1"/>
+        <Separator Margin="8,0,8,0" Grid.Row="1" VerticalAlignment="Center" Grid.ColumnSpan="2" Grid.Column="1"/>
+        <Grid Grid.RowSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <ListBox x:Name="constraintListBox" Grid.ColumnSpan="3" Margin="8" Grid.Row="1" SelectionChanged="ConstraintListBox_SelectionChanged"/>
+            <Button x:Name="addConstraintBtn" Content="添加" HorizontalAlignment="Stretch" Margin="8" Padding="8" VerticalAlignment="Stretch" Click="AddConstraintBtn_Click"/>
+            <Button x:Name="editConstraintBtn" Content="编辑" Grid.Column="1" Margin="8" Padding="8"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="EditConstraintBtn_Click" IsEnabled="False"/>
+            <Button x:Name="removeConstraintBtn" Content="删除" Grid.Column="2" Margin="8" Padding="8"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="RemoveConstraintBtn_Click" IsEnabled="False"/>
+        </Grid>
 
     </Grid>
 </Window>
