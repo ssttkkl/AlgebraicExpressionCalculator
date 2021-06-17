@@ -23,7 +23,7 @@ namespace AlgebraicExpressionSimplifier
             if (Sign != 0 && denominator.IsZero)
                 throw new DivideByZeroException();
             Numerator = numerator * numerator.Sign;
-            Denominator = denominator * numerator.Sign;
+            Denominator = denominator * denominator.Sign;
         }
         public static implicit operator RationalNumber(int num)
         {
