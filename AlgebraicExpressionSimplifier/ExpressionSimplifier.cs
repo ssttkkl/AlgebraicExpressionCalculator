@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace AlgebraicExpressionSimplifier
@@ -28,32 +29,32 @@ namespace AlgebraicExpressionSimplifier
             switch (tr.Operation)
             {
                 case Operation.Plus:
-                    return ep1.Plus(ep2);
+                    return ep1 + ep2;
                 case Operation.Minus:
-                    return ep1.Minus(ep2);
+                    return ep1 - ep2;
                 case Operation.Times:
-                    return ep1.Times(ep2);
+                    return ep1 * ep2;
                 case Operation.Divide:
-                    if (ep2.TryGetAsNumber(out double num))
-                        return ep1.Divide(num);
+                    if (ep2.TryGetAsNumber(out RationalNumber num))
+                        return ep1 / num;
                     else if (ep2.TryGetAsMonomial(out num, out UnitMonomial mono))
-                        return ep1.Divide(num).Times(new Polynomial(mono.Inv()));
+                        return ep1 / num * new Polynomial(mono.Inv(), 1);
                     else
                     {
                         ExpressionTree sub = new ExpressionTree(ep1, Operation.Divide, ep2, ep.Context);
                         Symbol sy = ep.Context.Symbol(tr.ToString());
                         substitution[sy] = sub;
-                        return new Polynomial(sy);
+                        return new Polynomial(sy, 1);
                     }
                 case Operation.Power:
                     if (ep2.TryGetAsNumber(out num))
-                        return ep1.Power((int)num);
+                        return ep1.Power((BigInteger)num);
                     else
                     {
                         ExpressionTree sub = new ExpressionTree(ep1, Operation.Power, ep2, ep.Context);
                         Symbol sy = ep.Context.Symbol(tr.ToString());
                         substitution[sy] = sub;
-                        return new Polynomial(sy);
+                        return new Polynomial(sy, 1);
                     }
                 default:
                     throw new NotImplementedException();

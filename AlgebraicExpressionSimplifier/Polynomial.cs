@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Numerics;
 
 namespace AlgebraicExpressionSimplifier
 {
-    public class Polynomial : Dictionary<UnitMonomial, double>, IExpression, IEquatable<Polynomial>
+    public class Polynomial : Dictionary<UnitMonomial, RationalNumber>, IExpression, IEquatable<Polynomial>
     {
         public ExpressionContext Context { get; }
 
@@ -19,19 +20,19 @@ namespace AlgebraicExpressionSimplifier
             Context = poly.Context;
         }
 
-        public Polynomial(double number, ExpressionContext context)
+        public Polynomial(RationalNumber number, ExpressionContext context)
         {
             Context = context;
             this[new UnitMonomial(context)] = number;
         }
 
-        public Polynomial(Symbol sy, double power = 1)
+        public Polynomial(Symbol sy, RationalNumber power)
         {
             Context = sy.Context;
             this[new UnitMonomial(sy, power)] = 1;
         }
 
-        public Polynomial(UnitMonomial mono, double coef = 1)
+        public Polynomial(UnitMonomial mono, RationalNumber coef)
         {
             Context = mono.Context;
             this[mono] = coef;
@@ -41,7 +42,7 @@ namespace AlgebraicExpressionSimplifier
         {
             foreach (var key in Keys.ToArray())
             {
-                if (TryGetValue(key, out double val) && val == 0)
+                if (TryGetValue(key, out RationalNumber val) && val.IsZero)
                 {
                     Remove(key);
                 }
@@ -128,7 +129,7 @@ namespace AlgebraicExpressionSimplifier
             return sb.ToString();
         }
 
-        public bool TryGetAsNumber(out double number)
+        public bool TryGetAsNumber(out RationalNumber number)
         {
             if (Count != 1)
             {
@@ -145,7 +146,7 @@ namespace AlgebraicExpressionSimplifier
         {
             if (Count != 1)
             {
-                symbol = null;
+                symbol = new Symbol();
                 return false;
             }
 
@@ -153,7 +154,7 @@ namespace AlgebraicExpressionSimplifier
             return item.Key.TryGetAsSymbol(out symbol) && item.Value == 1;
         }
 
-        public bool TryGetAsMonomial(out double coef, out UnitMonomial monomial)
+        public bool TryGetAsMonomial(out RationalNumber coef, out UnitMonomial monomial)
         {
             if (Count != 1)
             {
@@ -168,15 +169,15 @@ namespace AlgebraicExpressionSimplifier
             return true;
         }
 
-        public Polynomial Plus(Polynomial o)
+        public static Polynomial operator +(Polynomial x, Polynomial y)
         {
-            if (Context != o.Context)
+            if (x.Context != y.Context)
                 throw new DifferentContextException();
 
-            var poly = new Polynomial(this);
-            foreach (var item in o)
+            var poly = new Polynomial(x);
+            foreach (var item in y)
             {
-                if (!poly.TryGetValue(item.Key, out double val))
+                if (!poly.TryGetValue(item.Key, out RationalNumber val))
                     val = 0;
                 poly[item.Key] = val + item.Value;
             }
@@ -184,15 +185,15 @@ namespace AlgebraicExpressionSimplifier
             return poly;
         }
 
-        public Polynomial Minus(Polynomial o)
+        public static Polynomial operator -(Polynomial x, Polynomial y)
         {
-            if (Context != o.Context)
+            if (x.Context != y.Context)
                 throw new DifferentContextException();
 
-            var poly = new Polynomial(this);
-            foreach (var item in o)
+            var poly = new Polynomial(x);
+            foreach (var item in y)
             {
-                if (!poly.TryGetValue(item.Key, out double val))
+                if (!poly.TryGetValue(item.Key, out RationalNumber val))
                     val = 0;
                 poly[item.Key] = val - item.Value;
             }
@@ -200,22 +201,22 @@ namespace AlgebraicExpressionSimplifier
             return poly;
         }
 
-        public Polynomial Times(Polynomial o)
+        public static Polynomial operator *(Polynomial x, Polynomial y)
         {
-            if (Context != o.Context)
+            if (x.Context != y.Context)
                 throw new DifferentContextException();
 
-            var poly = new Polynomial(Context);
-            foreach (var item in this)
+            var poly = new Polynomial(x.Context);
+            foreach (var item in x)
             {
-                foreach (var item2 in o)
+                foreach (var item2 in y)
                 {
-                    double coef = item.Value * item2.Value;
+                    RationalNumber coef = item.Value * item2.Value;
                     if (coef == 0)
                         continue;
 
-                    UnitMonomial mono = item.Key.Times(item2.Key);
-                    if (!poly.TryGetValue(mono, out double val))
+                    UnitMonomial mono = item.Key * item2.Key;
+                    if (!poly.TryGetValue(mono, out RationalNumber val))
                         val = 0;
                     poly[mono] = val + coef;
                 }
@@ -224,19 +225,19 @@ namespace AlgebraicExpressionSimplifier
             return poly;
         }
 
-        public Polynomial Divide(double num)
+        public static Polynomial operator /(Polynomial x, RationalNumber y)
         {
-            if (num == 0)
+            if (y.IsZero)
                 throw new DivideByZeroException();
-            var poly = new Polynomial(this);
-            foreach (var key in Keys)
+            var poly = new Polynomial(x);
+            foreach (var key in x.Keys)
             {
-                poly[key] /= num;
+                poly[key] /= y;
             }
             return poly;
         }
 
-        public Polynomial Power(int pow)
+        public Polynomial Power(BigInteger pow)
         {
             var poly = new Polynomial(this);
             var ans = new Polynomial(1, Context);
@@ -244,10 +245,10 @@ namespace AlgebraicExpressionSimplifier
             {
                 if (pow % 2 == 1)
                 {
-                    ans = ans.Times(poly);
+                    ans *= poly;
                 }
                 pow /= 2;
-                poly = poly.Times(poly);
+                poly *= poly;
             }
             return ans;
         }

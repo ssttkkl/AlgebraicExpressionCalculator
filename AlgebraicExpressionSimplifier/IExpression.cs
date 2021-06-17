@@ -29,10 +29,12 @@ namespace AlgebraicExpressionSimplifier
             }
         }
 
-        private static IExpression BuildExpressionTree(double coef, UnitMonomial mono)
+        private static IExpression BuildExpressionTree(RationalNumber coef, UnitMonomial mono)
         {
             if (coef == 1)
                 return BuildExpressionTree(mono);
+            else if (mono.Count == 0)
+                return new Polynomial(coef, mono.Context);
             else
                 return new ExpressionTree(
                     new Polynomial(coef, mono.Context),

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace AlgebraicExpressionSimplifier
 {
-    public class UnitMonomial : SortedDictionary<Symbol, double>, IEquatable<UnitMonomial>, IExpressionContextHolder
+    public class UnitMonomial : SortedDictionary<Symbol, RationalNumber>, IEquatable<UnitMonomial>, IExpressionContextHolder
     {
         public ExpressionContext Context { get; }
 
@@ -19,7 +19,7 @@ namespace AlgebraicExpressionSimplifier
             Context = mono.Context;
         }
 
-        public UnitMonomial(Symbol sy, double power = 1)
+        public UnitMonomial(Symbol sy, RationalNumber power)
         {
             Context = sy.Context;
             this[sy] = power;
@@ -29,7 +29,7 @@ namespace AlgebraicExpressionSimplifier
         {
             foreach (var key in Keys.ToArray())
             {
-                if (TryGetValue(key, out double val) && val == 0)
+                if (TryGetValue(key, out RationalNumber val) && val.IsZero)
                 {
                     Remove(key);
                 }
@@ -90,15 +90,15 @@ namespace AlgebraicExpressionSimplifier
             return !(left == right);
         }
 
-        public UnitMonomial Times(UnitMonomial o)
+        public static UnitMonomial operator*(UnitMonomial x, UnitMonomial y)
         {
-            if (Context != o.Context)
+            if (x.Context != y.Context)
                 throw new DifferentContextException();
 
-            var mono = new UnitMonomial(this);
-            foreach (var item in o)
+            var mono = new UnitMonomial(x);
+            foreach (var item in y)
             {
-                if (!mono.TryGetValue(item.Key, out double val))
+                if (!mono.TryGetValue(item.Key, out RationalNumber val))
                     val = 0;
                 mono[item.Key] = val + item.Value;
             }
@@ -135,7 +135,7 @@ namespace AlgebraicExpressionSimplifier
         {
             if (Count != 1)
             {
-                symbol = null;
+                symbol = new Symbol();
                 return false;
             }
 

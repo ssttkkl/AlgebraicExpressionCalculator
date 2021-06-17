@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace AlgebraicExpressionSimplifier
@@ -40,12 +41,12 @@ namespace AlgebraicExpressionSimplifier
                 switch (ele.Item2)
                 {
                     case 0:
-                        double num = double.Parse(ele.Item1);
+                        RationalNumber num = RationalNumber.Parse(ele.Item1);
                         eps.Push(new Polynomial(num, context));
                         break;
                     case 1:
                         Symbol sy = context.Symbol(ele.Item1);
-                        eps.Push(new Polynomial(sy));
+                        eps.Push(new Polynomial(sy, 1));
                         break;
                     case 2:
                         while (true)
