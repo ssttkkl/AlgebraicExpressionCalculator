@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace AlgebraicExpressionSimplifier
+namespace MathematicalExpressionCalculator
 {
     public class Symbol : IExpressionContextHolder<Symbol>, IComparable<Symbol>, IEquatable<Symbol>
     {
         public string Name { get; }
         public ExpressionContext Context { get; }
-        public IExpression Constraint
+        public IExpression Assignment
         {
-            get => Context.GetSymbolConstraint(this);
+            get => Context.GetSymbolAssignment(this);
         }
 
         public Symbol(string name, ExpressionContext context)
@@ -26,7 +26,7 @@ namespace AlgebraicExpressionSimplifier
 
         public override string ToString()
         {
-            return Name;
+            return Name.Length == 1 ? Name : "{" + Name + "}";
         }
 
         public int CompareTo([AllowNull] Symbol other)

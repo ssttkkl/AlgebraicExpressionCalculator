@@ -3,40 +3,13 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
-namespace AlgebraicExpressionSimplifier
+namespace MathematicalExpressionCalculator
 {
     public static class ExpressionSimplifier
     {
-        public static IExpression WithConstraint(this IExpression ep)
-        {
-            if (ep is Polynomial poly)
-            {
-                ep = poly.BuildExpressionTree();
-                if (ep is Polynomial poly2)
-                {
-                    // poly2必为纯变量或纯数字
-                    if (poly2.TryGetAsSymbol(out var sy) && sy.Constraint != null)
-                    {
-                        return sy.Constraint;
-                    }
-                    else
-                    {
-                        return poly2;
-                    }
-                }
-            }
-
-            var tree = ep as ExpressionTree;
-            return new ExpressionTree(
-                    tree.Left.WithConstraint(),
-                    tree.Operation,
-                    tree.Right.WithConstraint(),
-                    tree.Context
-            );
-        }
         public static IExpression Simplify(this IExpression ep)
         {
-            if (ep is ExpressionTree tree)
+            if (ep is ExpressionTree)
             {
                 var context = ep.Context;
                 var subContext = new ExpressionContext();
@@ -69,11 +42,11 @@ namespace AlgebraicExpressionSimplifier
                 case Operation.Times:
                     return ep1 * ep2;
                 case Operation.Divide:
-                    if (ep2.TryGetAsNumber(out RationalNumber num))
+                    if (ep2.TryGetAsNumber(out RationalNumber num)) // 除以数字
                         return ep1 / num;
-                    else if (ep2.TryGetAsMonomial(out num, out UnitMonomial mono))
-                        return ep1 / num * new Polynomial(mono.Inv(), 1);
-                    else
+                    else if (ep2.TryGetAsMonomial(out num, out UnitMonomial mono)) // 除以单项式（系数相除，变量幂数取相反数后相乘）
+                        return ep1 / num * new Polynomial(1, mono.Inv());
+                    else // 代换
                     {
                         ExpressionTree sub = new ExpressionTree(ep1, Operation.Divide, ep2, context);
                         Symbol sy = tr.Context.Symbol(tr.ToString());
@@ -81,12 +54,12 @@ namespace AlgebraicExpressionSimplifier
                         return new Polynomial(sy, 1);
                     }
                 case Operation.Power:
-                    if (ep2.TryGetAsNumber(out num))
+                    if (ep2.TryGetAsNumber(out num) && num.IsInteger) // 幂为整数
                         return ep1.Power((BigInteger)num);
-                    else
+                    else // 代换
                     {
                         ExpressionTree sub = new ExpressionTree(ep1, Operation.Power, ep2, context);
-                        Symbol sy = context.Symbol(tr.ToString());
+                        Symbol sy = context.Symbol(sub.ToString());
                         substitution[sy] = sub;
                         return new Polynomial(sy, 1);
                     }
@@ -99,8 +72,8 @@ namespace AlgebraicExpressionSimplifier
         {
             if (ep is Polynomial poly)
             {
-                if (poly.TryGetAsSymbol(out Symbol sy) && substitution.TryGetValue(sy, out IExpression ans))
-                    return ans;
+                if (poly.TryGetAsSymbol(out Symbol sy) && substitution.TryGetValue(sy, out IExpression sub))
+                    return sub;
                 else
                     return poly;
             }
@@ -113,6 +86,36 @@ namespace AlgebraicExpressionSimplifier
                     tree.Context);
             }
             throw new NotSupportedException();
+        }
+        public static IExpression WithAssignment(this IExpression ep)
+        {
+            if (ep is Polynomial poly)
+            {
+                if (poly.TryGetAsSymbol(out var sy))
+                {
+                    if (sy.Assignment != null)
+                        return sy.Assignment;
+                    else
+                        return poly;
+                }
+                else
+                {
+                    ep = poly.BuildExpressionTree();
+                    if (ep is Polynomial)
+                    {
+                        // ep必为纯数字
+                        return ep;
+                    }
+                }
+            }
+
+            var tree = ep as ExpressionTree;
+            return new ExpressionTree(
+                    tree.Left.WithAssignment(),
+                    tree.Operation,
+                    tree.Right.WithAssignment(),
+                    tree.Context
+            );
         }
     }
 }

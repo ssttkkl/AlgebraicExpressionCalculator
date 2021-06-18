@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Linq;
 
-namespace AlgebraicExpressionSimplifier
+namespace MathematicalExpressionCalculator
 {
     public struct RationalNumber : IComparable<RationalNumber>, IEquatable<RationalNumber>
     {
@@ -86,6 +86,7 @@ namespace AlgebraicExpressionSimplifier
         public bool IsZero { get => Sign == 0; }
         public bool IsOne { get => Sign == 1 && Numerator == Denominator; }
         public bool IsMinusOne { get => Sign == -1 && Numerator == Denominator; }
+        public bool IsInteger { get => Sign == 0 || Numerator % Denominator == 0; }
 
         public override bool Equals(object obj)
         {

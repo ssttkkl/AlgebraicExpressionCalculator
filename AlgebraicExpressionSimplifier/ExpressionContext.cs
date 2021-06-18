@@ -1,25 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AlgebraicExpressionSimplifier
+namespace MathematicalExpressionCalculator
 {
     public class ExpressionContext
     {
-        private ExpressionContext(
-            Dictionary<string, Symbol> symbols,
-            Dictionary<Symbol, IExpression> symbolConstraints)
-        {
-            this.symbols = symbols;
-            this.symbolConstraints = symbolConstraints;
-        }
-
-        public ExpressionContext() : this(
-            new Dictionary<string, Symbol>(),
-            new Dictionary<Symbol, IExpression>())
-        { }
-
-        private readonly Dictionary<string, Symbol> symbols;
-        private readonly Dictionary<Symbol, IExpression> symbolConstraints;
+        private readonly Dictionary<string, Symbol> symbols = new Dictionary<string, Symbol>();
+        private readonly Dictionary<Symbol, IExpression> symbolAssignment = new Dictionary<Symbol, IExpression>();
 
         public IReadOnlyCollection<Symbol> Symbols => symbols.Values;
         public Symbol Symbol(string name)
@@ -35,18 +22,18 @@ namespace AlgebraicExpressionSimplifier
             symbols[name] = sy;
             return sy;
         }
-        public IExpression GetSymbolConstraint(Symbol symbol)
+        public IExpression GetSymbolAssignment(Symbol symbol)
         {
             if (symbol.Context != this)
                 throw new DifferentContextException();
             else
             {
-                if (symbolConstraints.TryGetValue(symbol, out var ep))
+                if (symbolAssignment.TryGetValue(symbol, out var ep))
                     return ep;
                 return null;
             }
         }
-        public void SetSymbolConstraint(Symbol symbol, IExpression expression)
+        public void SetSymbolAssignment(Symbol symbol, IExpression expression)
         {
             if (symbol.Context != this)
                 throw new DifferentContextException();
@@ -54,7 +41,7 @@ namespace AlgebraicExpressionSimplifier
             {
                 if (expression.Context != this)
                     expression = expression.WithContext(this);
-                symbolConstraints[symbol] = expression;
+                symbolAssignment[symbol] = expression;
             }
         }
         public ExpressionContext Clone()
@@ -62,7 +49,7 @@ namespace AlgebraicExpressionSimplifier
             var context = new ExpressionContext();
             foreach (var item in Symbols)
             {
-                context.SetSymbolConstraint(item.WithContext(context), item.Constraint);
+                context.SetSymbolAssignment(item.WithContext(context), item.Assignment);
             }
             return context;
         }
@@ -86,26 +73,7 @@ namespace AlgebraicExpressionSimplifier
                 graph[i] = new List<int>();
             }
 
-            void AnalyseRelation(IExpression ep, HashSet<Symbol> relation)
-            {
-                if (ep is Polynomial poly)
-                {
-                    foreach (var mono in poly.Keys)
-                    {
-                        foreach (var sy in mono.Keys)
-                        {
-                            relation.Add(sy);
-                        }
-                    }
-                }
-                else if (ep is ExpressionTree tree)
-                {
-                    AnalyseRelation(tree.Left, relation);
-                    AnalyseRelation(tree.Right, relation);
-                }
-            }
-
-            foreach (var item in symbolConstraints)
+            foreach (var item in symbolAssignment)
             {
                 var relation = new HashSet<Symbol>();
                 AnalyseRelation(item.Value, relation);
@@ -143,7 +111,7 @@ namespace AlgebraicExpressionSimplifier
                 }
             }
 
-            // 按照排序的逆序将变量约束逐条代入并简化
+            // 按照排序的逆序将变量赋值逐条代入并简化
             if (order.Count != n)
                 throw new InvalidOperationException("变量存在循环引用");
             else
@@ -152,13 +120,31 @@ namespace AlgebraicExpressionSimplifier
                 {
                     int v = order.Pop();
                     var sy = symbolList[v];
-                    var ep = sy.Constraint;
+                    var ep = sy.Assignment;
                     if (ep != null)
                     {
-                        ep = ep.WithConstraint().Simplify();
-                        SetSymbolConstraint(sy, ep);
+                        ep = ep.WithAssignment().Simplify();
+                        SetSymbolAssignment(sy, ep);
                     }
                 }
+            }
+        }
+        private static void AnalyseRelation(IExpression ep, HashSet<Symbol> relation)
+        {
+            if (ep is Polynomial poly)
+            {
+                foreach (var mono in poly.Keys)
+                {
+                    foreach (var sy in mono.Keys)
+                    {
+                        relation.Add(sy);
+                    }
+                }
+            }
+            else if (ep is ExpressionTree tree)
+            {
+                AnalyseRelation(tree.Left, relation);
+                AnalyseRelation(tree.Right, relation);
             }
         }
     }

@@ -4,7 +4,7 @@ using System.Text;
 using System.Linq;
 using System.Numerics;
 
-namespace AlgebraicExpressionSimplifier
+namespace MathematicalExpressionCalculator
 {
     public class Polynomial : Dictionary<UnitMonomial, RationalNumber>, IExpression, IEquatable<Polynomial>, IExpressionContextHolder<Polynomial>
     {
@@ -32,7 +32,7 @@ namespace AlgebraicExpressionSimplifier
             this[new UnitMonomial(sy, power)] = 1;
         }
 
-        public Polynomial(UnitMonomial mono, RationalNumber coef)
+        public Polynomial(RationalNumber coef, UnitMonomial mono)
         {
             Context = mono.Context;
             this[mono] = coef;
@@ -112,27 +112,34 @@ namespace AlgebraicExpressionSimplifier
             var sb = new StringBuilder();
             foreach (var item in this)
             {
-                if (sb.Length > 0 && item.Value > 0)
+                if (sb.Length > 0 && item.Value.Sign > 0)
                     sb.Append("+");
                 if (item.Key.Count == 0)
                     sb.Append(item.Value);
-                else if (item.Value == -1)
+                else if (item.Value.IsMinusOne)
                     sb.Append("-");
-                else if (item.Value != 1)
+                else if (!item.Value.IsOne)
                     sb.Append(item.Value);
                 foreach (var item2 in item.Key)
                 {
                     sb.Append(item2.Key.ToString());
-                    if (item2.Value != 1)
+                    if (!item2.Value.IsOne)
                     {
                         sb.Append("^");
-                        sb.Append(item2.Value);
+                        if (item2.Value.Sign < 0 || !item2.Value.IsInteger)
+                        {
+                            sb.Append("(");
+                            sb.Append(item2.Value);
+                            sb.Append(")");
+                        }
+                        else
+                            sb.Append(item2.Value);
                     }
                 }
             }
             return sb.ToString();
         }
-
+        public bool IsNumber => Count == 1 && this.Single().Key.Count == 0;
         public bool TryGetAsNumber(out RationalNumber number)
         {
             if (Count != 1)
@@ -145,7 +152,7 @@ namespace AlgebraicExpressionSimplifier
             number = item.Value;
             return item.Key.Count == 0;
         }
-
+        public bool IsSymbol => Count == 1 && this.Single().Key.IsSymbol;
         public bool TryGetAsSymbol(out Symbol symbol)
         {
             if (Count != 1)
@@ -157,7 +164,6 @@ namespace AlgebraicExpressionSimplifier
             var item = this.Single();
             return item.Key.TryGetAsSymbol(out symbol) && item.Value == 1;
         }
-
         public bool TryGetAsMonomial(out RationalNumber coef, out UnitMonomial monomial)
         {
             if (Count != 1)

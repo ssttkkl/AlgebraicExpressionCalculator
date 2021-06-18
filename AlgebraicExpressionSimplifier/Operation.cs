@@ -1,4 +1,4 @@
-﻿namespace AlgebraicExpressionSimplifier
+﻿namespace MathematicalExpressionCalculator
 {
     public enum Operation
     {

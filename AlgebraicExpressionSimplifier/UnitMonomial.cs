@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 
-namespace AlgebraicExpressionSimplifier
+namespace MathematicalExpressionCalculator
 {
     public class UnitMonomial : SortedDictionary<Symbol, RationalNumber>, IEquatable<UnitMonomial>, IExpressionContextHolder<UnitMonomial>
     {
@@ -130,7 +130,7 @@ namespace AlgebraicExpressionSimplifier
             }
             return sb.ToString();
         }
-
+        public bool IsSymbol => Count == 1 && this.Single().Value.IsOne;
         public bool TryGetAsSymbol(out Symbol symbol)
         {
             if (Count != 1)

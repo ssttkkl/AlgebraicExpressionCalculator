@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
-namespace AlgebraicExpressionSimplifier
+namespace MathematicalExpressionCalculator
 {
     public class ExpressionTree : IExpression, IEquatable<ExpressionTree>, IExpressionContextHolder<ExpressionTree>
     {
@@ -32,26 +33,123 @@ namespace AlgebraicExpressionSimplifier
 
         public override string ToString()
         {
-            string op = "";
-            switch (Operation)
+            var sb = new StringBuilder();
+            var str1 = Left.ToString();
+            var str2 = Right.ToString();
+
+            if (Operation == Operation.Plus)
             {
-                case Operation.Plus:
-                    op = "+";
-                    break;
-                case Operation.Minus:
-                    op = "-";
-                    break;
-                case Operation.Times:
-                    op = "*";
-                    break;
-                case Operation.Divide:
-                    op = "/";
-                    break;
-                case Operation.Power:
-                    op = "^";
-                    break;
+                // 左右操作数均不加括号
+                sb.Append(str1);
+                sb.Append("+");
+                sb.Append(str2);
             }
-            return $"({Left}{op}{Right})";
+            else if (Operation == Operation.Minus)
+            {
+                // 左操作数不加括号，右操作数是乘除幂不加括号
+                sb.Append(str1);
+
+                sb.Append("-");
+
+                if ((Right is Polynomial poly2 && poly2.Count == 1) ||
+                    (Right is ExpressionTree tree2 && (tree2.Operation == Operation.Times || tree2.Operation == Operation.Divide || tree2.Operation == Operation.Power)))
+                {
+                    sb.Append(str2);
+                }
+                else
+                {
+                    sb.Append("(");
+                    sb.Append(str2);
+                    sb.Append(")");
+                }
+            }
+            else if (Operation == Operation.Times)
+            {
+                // 左操作数是乘除幂不加括号，右操作数是乘除幂不加括号
+                if ((Left is Polynomial poly1 && poly1.Count == 1) ||
+                    (Left is ExpressionTree tree1 && (tree1.Operation == Operation.Times || tree1.Operation == Operation.Divide || tree1.Operation == Operation.Power)))
+                {
+                    sb.Append(str1);
+                }
+                else
+                {
+                    sb.Append("(");
+                    sb.Append(str1);
+                    sb.Append(")");
+                }
+
+                // sb.Append("*");
+
+                if ((Right is Polynomial poly2 && poly2.Count == 1) ||
+                    (Right is ExpressionTree tree2 && (tree2.Operation == Operation.Times || tree2.Operation == Operation.Divide || tree2.Operation == Operation.Power)))
+                {
+                    sb.Append(str2);
+                }
+                else
+                {
+                    sb.Append("(");
+                    sb.Append(str2);
+                    sb.Append(")");
+                }
+            }
+            else if (Operation == Operation.Divide)
+            {
+                // 左操作数是乘除幂不加括号，右操作数是幂不加括号
+                if ((Left is Polynomial poly1 && poly1.Count == 1) ||
+                    (Left is ExpressionTree tree1 && (tree1.Operation == Operation.Times || tree1.Operation == Operation.Divide || tree1.Operation == Operation.Power)))
+                {
+                    sb.Append(str1);
+                }
+                else
+                {
+                    sb.Append("(");
+                    sb.Append(str1);
+                    sb.Append(")");
+                }
+
+                sb.Append("/");
+
+                if (Right is Polynomial poly2 && (poly2.IsSymbol || poly2.IsNumber) ||
+                    (Right is ExpressionTree tree2 && tree2.Operation == Operation.Power))
+                {
+                    sb.Append(str2);
+                }
+                else
+                {
+                    sb.Append("(");
+                    sb.Append(str2);
+                    sb.Append(")");
+                }
+            }
+            else if (Operation == Operation.Power)
+            {
+                // 左操作数是幂不加括号，右操作数必加括号
+                if ((Left is Polynomial poly1 && poly1.Count == 1) ||
+                    (Left is ExpressionTree tree1 && tree1.Operation == Operation.Power))
+                {
+                    sb.Append(str1);
+                }
+                else
+                {
+                    sb.Append("(");
+                    sb.Append(str1);
+                    sb.Append(")");
+                }
+
+                sb.Append("^");
+
+                if (Right is Polynomial poly2 && (poly2.IsSymbol || poly2.IsNumber))
+                {
+                    sb.Append(str2);
+                }
+                else
+                {
+                    sb.Append("(");
+                    sb.Append(str2);
+                    sb.Append(")");
+                }
+            }
+            return sb.ToString();
         }
 
         public override bool Equals(object obj)

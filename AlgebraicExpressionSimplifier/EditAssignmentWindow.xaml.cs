@@ -11,21 +11,20 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace AlgebraicExpressionSimplifier
+namespace MathematicalExpressionCalculator
 {
     /// <summary>
-    /// EditConstraintWindow.xaml 的交互逻辑
+    /// EditAssignmentWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class EditConstraintWindow : Window
+    public partial class EditAssignmentWindow : Window
     {
         public string SymbolName { get; private set; }
         public string SymbolValue { get; private set; }
-        public IExpression SymbolExpression { get; private set; }
-        public EditConstraintWindow()
+        public EditAssignmentWindow()
         {
             InitializeComponent();
         }
-        public EditConstraintWindow(string symbolName, string symbolValue)
+        public EditAssignmentWindow(string symbolName, string symbolValue)
         {
             InitializeComponent();
             syNameTextBox.Text = SymbolName = symbolName;
@@ -68,7 +67,6 @@ namespace AlgebraicExpressionSimplifier
             {
                 SymbolName = syNameTextBox.Text;
                 SymbolValue = syValueTextBox.Text;
-                SymbolExpression = ep;
                 DialogResult = true;
             }
         }

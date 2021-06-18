@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
-namespace AlgebraicExpressionSimplifier
+namespace MathematicalExpressionCalculator
 {
     public static class ExpressionParser
     {
@@ -20,7 +20,6 @@ namespace AlgebraicExpressionSimplifier
             else
                 throw new ArgumentException($"Illegal Operator: {op}");
         }
-
 
         public static IExpression Parse(string text, ExpressionContext context)
         {
@@ -39,15 +38,15 @@ namespace AlgebraicExpressionSimplifier
             {
                 switch (ele.Item2)
                 {
-                    case 0:
+                    case 0: // 数字
                         RationalNumber num = RationalNumber.Parse(ele.Item1);
                         eps.Push(new Polynomial(num, context));
                         break;
-                    case 1:
+                    case 1: // 变量
                         Symbol sy = context.Symbol(ele.Item1);
                         eps.Push(new Polynomial(sy, 1));
                         break;
-                    case 2:
+                    case 2: // 算符
                         while (true)
                         {
                             if (ops.Count == 0)
@@ -55,8 +54,8 @@ namespace AlgebraicExpressionSimplifier
 
                             string op1 = ops.Peek();
                             string op2 = ele.Item1;
-                            // 对于非乘方的运算，只要栈顶运算符大于等于当前运算符就弹栈；
-                            // 对于乘方运算，只要栈顶运算符大于当前运算符就弹栈；
+                            // 对于非乘方的运算，只要栈顶运算符**大于等于**当前运算符就弹栈；
+                            // 对于乘方运算，只要栈顶运算符**大于**当前运算符就弹栈；
                             if (!((op2 == "^" && OperatorPriority(op1) > OperatorPriority(op2))
                                 || (op2 != "^" && OperatorPriority(op1) >= OperatorPriority(op2))))
                                 break;
@@ -86,7 +85,7 @@ namespace AlgebraicExpressionSimplifier
                         }
                         ops.Push(ele.Item1);
                         break;
-                    case 3:
+                    case 3: // 括号
                         if (ele.Item1 == "(")
                             ops.Push("(");
                         else if (ele.Item1 == ")")
@@ -122,17 +121,17 @@ namespace AlgebraicExpressionSimplifier
                 }
             }
 
-            return eps.Count == 1 ? eps.Peek() : throw new ArgumentException("Illegal expression");
+            return eps.Count == 1 ? eps.Peek() : throw new ArgumentException("表达式不合法");
         }
 
-        public static List<(string, int)> SplitText(string text)
+        private static List<(string, int)> SplitText(string text)
         {
             List<(string, int)> list = new List<(string, int)>();
             StringBuilder numberBuilder = new StringBuilder();
             for (int i = 0; i < text.Length; i++)
             {
                 char c = text[i];
-                if (char.IsDigit(c) || c == '.') // part of a number
+                if (char.IsDigit(c) || c == '.') // 数字的一部分
                 {
                     numberBuilder.Append(c);
                 }
@@ -145,9 +144,10 @@ namespace AlgebraicExpressionSimplifier
                         numberBuilder.Clear();
                     }
 
-                    if (c == '+' || c == '-' || c == '*' || c == '/' || c == '^') // operator
+                    if (c == '+' || c == '-' || c == '*' || c == '/' || c == '^') // 算符
                     {
-                        if (list.Count == 0 || (c == '-' && list[^1].Item2 != 0 && list[^1].Item2 != 1))
+                        // 若-是负号而不是算符
+                        if (c == '-' && (list.Count == 0 || (list[^1].Item2 != 0 && list[^1].Item2 != 1)))
                         {
                             list.Add(("-1", 0));
                             list.Add(("*", 2));
@@ -157,20 +157,38 @@ namespace AlgebraicExpressionSimplifier
                             list.Add((c.ToString(), 2));
                         }
                     }
-                    else if (c == '(')
+                    else if (c == '(') // 左括号
                     {
+                        // 若两个元素间省略了乘号
                         if (list.Count > 0 && (list[^1].Item2 == 0 || list[^1].Item2 == 1 || list[^1].Item1 == ")"))
                         {
                             list.Add(("*", 2));
                         }
-                        list.Add((c.ToString(), 3));
+                        list.Add(("(", 3));
                     }
-                    else if (c == ')')
+                    else if (c == ')') // 右括号
                     {
-                        list.Add((c.ToString(), 3));
+                        list.Add((")", 3));
                     }
-                    else // symbol
+                    else if (c == '{') // 大括号包裹的变量名
                     {
+                        // 若两个元素间省略了乘号
+                        if (list.Count > 0 && (list[^1].Item2 == 0 || list[^1].Item2 == 1 || list[^1].Item1 == ")"))
+                        {
+                            list.Add(("*", 2));
+                        }
+
+                        int j = i;
+                        while (text[j] != '}')
+                        {
+                            j++;
+                        }
+                        list.Add((text.Substring(i + 1, j - i - 1), 1));
+                        i = j;
+                    }
+                    else // 单个字母视为变量名
+                    {
+                        // 若两个元素间省略了乘号
                         if (list.Count > 0 && (list[^1].Item2 == 0 || list[^1].Item2 == 1 || list[^1].Item1 == ")"))
                         {
                             list.Add(("*", 2));

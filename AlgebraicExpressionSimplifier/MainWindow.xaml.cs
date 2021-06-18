@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AlgebraicExpressionSimplifier
+namespace MathematicalExpressionCalculator
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -47,13 +47,13 @@ namespace AlgebraicExpressionSimplifier
                 ExpressionContext context = new ExpressionContext();
                 foreach (var item in constraints)
                 {
-                    context.SetSymbolConstraint(context.Symbol(item.name),
+                    context.SetSymbolAssignment(context.Symbol(item.name),
                         ExpressionParser.Parse(item.value, context));
                 }
                 context.AnalyseConstraints();
 
                 IExpression ep = ExpressionParser.Parse(epTextBox.Text, context);
-                ep = ep.WithConstraint().Simplify();
+                ep = ep.WithAssignment().Simplify();
                 resTextBlock.Text = ep.ToString();
 
             }
@@ -65,7 +65,7 @@ namespace AlgebraicExpressionSimplifier
 
         private void AddConstraintBtn_Click(object sender, RoutedEventArgs e)
         {
-            EditConstraintWindow w = new EditConstraintWindow();
+            EditAssignmentWindow w = new EditAssignmentWindow();
             if (w.ShowDialog() ?? false)
             {
                 string name = w.SymbolName;
@@ -90,7 +90,7 @@ namespace AlgebraicExpressionSimplifier
             if (idx != -1)
             {
                 var item = constraints[idx];
-                EditConstraintWindow w = new EditConstraintWindow(item.name, item.value);
+                EditAssignmentWindow w = new EditAssignmentWindow(item.name, item.value);
                 if (w.ShowDialog() ?? false)
                 {
                     string name = w.SymbolName;
