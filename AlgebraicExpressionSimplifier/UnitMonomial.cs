@@ -106,7 +106,7 @@ namespace MathematicalExpressionCalculator
             return mono;
         }
 
-        public UnitMonomial Inv()
+        public UnitMonomial Reciprocal()
         {
             var mono = new UnitMonomial(this);
             foreach(var key in Keys)

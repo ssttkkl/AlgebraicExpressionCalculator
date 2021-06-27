@@ -45,7 +45,7 @@ namespace MathematicalExpressionCalculator
                     if (ep2.TryGetAsNumber(out RationalNumber num)) // 除以数字
                         return ep1 / num;
                     else if (ep2.TryGetAsMonomial(out num, out UnitMonomial mono)) // 除以单项式（系数相除，变量幂数取相反数后相乘）
-                        return ep1 / num * new Polynomial(1, mono.Inv());
+                        return ep1 / num * new Polynomial(1, mono.Reciprocal());
                     else // 代换
                     {
                         ExpressionTree sub = new ExpressionTree(ep1, Operation.Divide, ep2, context);

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Linq;
 
@@ -75,12 +74,12 @@ namespace MathematicalExpressionCalculator
             get
             {
                 if (Sign == 0)
-                    return this;
+                    return new RationalNumber(0);
                 var gcd = GCD(Numerator, Denominator);
                 if (gcd.IsOne)
                     return this;
                 else
-                    return new RationalNumber(Numerator / gcd, Denominator / gcd);
+                    return new RationalNumber(Numerator / gcd, Denominator / gcd, Sign);
             }
         }
         public bool IsZero { get => Sign == 0; }
@@ -94,6 +93,11 @@ namespace MathematicalExpressionCalculator
         }
 
         public bool Equals(RationalNumber other)
+        {
+            return Simplified.AbsolutelyEquals(other.Simplified);
+        }
+
+        public bool AbsolutelyEquals(RationalNumber other)
         {
             return Sign == other.Sign &&
                    Numerator.Equals(other.Numerator) &&
@@ -114,7 +118,7 @@ namespace MathematicalExpressionCalculator
             if (x.Sign * y.Sign == 1)
             {
                 var lcm = x.Denominator * y.Denominator / GCD(x.Denominator, y.Denominator);
-                var ans = new RationalNumber(x.Numerator * lcm / y.Denominator + y.Numerator * lcm / x.Denominator, lcm, x.Sign).Simplified;
+                var ans = new RationalNumber(x.Numerator * lcm / x.Denominator + y.Numerator * lcm / y.Denominator, lcm, x.Sign).Simplified;
                 return ans;
             }
             else if (x.Sign * y.Sign == -1)
@@ -132,7 +136,7 @@ namespace MathematicalExpressionCalculator
             {
                 // x<0, y<0, x-y=(-|x|)-(-|y|)=-(|x|-|y|)
                 var lcm = x.Denominator * y.Denominator / GCD(x.Denominator, y.Denominator);
-                var ans = new RationalNumber(x.Numerator * lcm / y.Denominator - y.Numerator * lcm / x.Denominator, lcm, x.Sign).Simplified;
+                var ans = new RationalNumber(x.Numerator * lcm / x.Denominator - y.Numerator * lcm / y.Denominator, lcm, x.Sign).Simplified;
                 return ans;
             }
             else if (x.Sign * y.Sign == -1)
@@ -160,7 +164,7 @@ namespace MathematicalExpressionCalculator
 
         public static bool operator ==(RationalNumber left, RationalNumber right)
         {
-            return left.Simplified.Equals(right.Simplified);
+            return EqualityComparer<RationalNumber>.Default.Equals(left, right);
         }
 
         public static bool operator !=(RationalNumber left, RationalNumber right)
@@ -205,6 +209,16 @@ namespace MathematicalExpressionCalculator
         public static bool operator <(RationalNumber left, RationalNumber right)
         {
             return left.CompareTo(right) < 0;
+        }
+
+        public static bool operator <=(RationalNumber left, RationalNumber right)
+        {
+            return left.CompareTo(right) <= 0;
+        }
+
+        public static bool operator >=(RationalNumber left, RationalNumber right)
+        {
+            return left.CompareTo(right) >= 0;
         }
     }
 }
