@@ -15,8 +15,15 @@ namespace MathematicalExpressionCalculator
                 var subContext = new ExpressionContext();
                 var substitution = new Dictionary<Symbol, IExpression>();
                 var poly = Polynomialize(ep.WithContext(subContext), subContext, substitution);
-                var ep2 = poly.BuildExpressionTree();
-                return RevertSubstitution(ep2, substitution).WithContext(context);
+                if (substitution.Count == 0)
+                {
+                    return poly;
+                }
+                else
+                {
+                    var ep2 = poly.BuildExpressionTree();
+                    return RevertSubstitution(ep2, substitution).WithContext(context);
+                }
             }
             else
             {

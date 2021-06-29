@@ -40,7 +40,7 @@ namespace MathematicalExpressionCalculator
             constraintListBox.ItemsSource = constraints;
         }
 
-        private void GoBtn_Click(object sender, RoutedEventArgs e)
+        private void GoButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -52,14 +52,15 @@ namespace MathematicalExpressionCalculator
                 }
                 context.AnalyseConstraints();
 
-                IExpression ep = ExpressionParser.Parse(epTextBox.Text, context);
+                IExpression ep = ExpressionParser.Parse(InputTextBox.Text, context);
                 ep = ep.WithAssignment().Simplify();
-                resTextBlock.Text = ep.ToString();
+                OutputTextBlock.Text = ep.ToString();
+                OutputFormula.Formula = ep.ToLaTeX();
 
             }
             catch (Exception exc)
             {
-                resTextBlock.Text = exc.Message + "\n" + exc.StackTrace;
+                OutputTextBlock.Text = exc.Message + "\n" + exc.StackTrace;
             }
         }
 
@@ -111,6 +112,23 @@ namespace MathematicalExpressionCalculator
         {
             bool enabled = (sender as ListBox).SelectedItem != null;
             editConstraintBtn.IsEnabled = removeConstraintBtn.IsEnabled = enabled;
+        }
+
+        private void InputTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                ExpressionContext context = new ExpressionContext();
+                IExpression ep = ExpressionParser.Parse(InputTextBox.Text, context);
+                InputFormula.Formula = ep.ToLaTeX();
+                InputTextBox.FontWeight = FontWeights.Normal;
+                InputTextBox.Foreground = Brushes.Black;
+            }
+            catch
+            {
+                InputTextBox.FontWeight = FontWeights.Heavy;
+                InputTextBox.Foreground = Brushes.OrangeRed;
+            }
         }
     }
 }

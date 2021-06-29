@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.Collections.Specialized" Version="4.3.0" />
+    <PackageReference Include="WpfMath" Version="0.9.0" />
   </ItemGroup>
 
 </Project>

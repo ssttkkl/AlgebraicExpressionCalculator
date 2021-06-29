@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace MathematicalExpressionCalculator
 {
@@ -78,7 +79,11 @@ namespace MathematicalExpressionCalculator
                     sb.Append(")");
                 }
 
-                // sb.Append("*");
+                // 右操作数是单项式且系数不为1时加上乘号
+                if (Right is Polynomial poly22 && poly22.Count == 1 && !poly22.Single().Value.IsOne)
+                {
+                    sb.Append("*");
+                }
 
                 if ((Right is Polynomial poly2 && poly2.Count == 1) ||
                     (Right is ExpressionTree tree2 && (tree2.Operation == Operation.Times || tree2.Operation == Operation.Divide || tree2.Operation == Operation.Power)))
@@ -123,9 +128,8 @@ namespace MathematicalExpressionCalculator
             }
             else if (Operation == Operation.Power)
             {
-                // 左操作数是幂不加括号，右操作数必加括号
-                if ((Left is Polynomial poly1 && poly1.Count == 1) ||
-                    (Left is ExpressionTree tree1 && tree1.Operation == Operation.Power))
+                // 左操作数必加括号，右操作数是幂不加括号
+                if (Left is Polynomial poly1 && (poly1.IsSymbol || poly1.IsNumber))
                 {
                     sb.Append(str1);
                 }
@@ -138,7 +142,8 @@ namespace MathematicalExpressionCalculator
 
                 sb.Append("^");
 
-                if (Right is Polynomial poly2 && (poly2.IsSymbol || poly2.IsNumber))
+                if ((Right is Polynomial poly2 && (poly2.IsSymbol || (poly2.TryGetAsNumber(out var num) && num.Sign > 0))) ||
+                    (Right is ExpressionTree tree2 && tree2.Operation == Operation.Power))
                 {
                     sb.Append(str2);
                 }

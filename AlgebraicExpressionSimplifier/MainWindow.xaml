@@ -3,39 +3,42 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MathematicalExpressionCalculator"
+        xmlns:local="clr-namespace:MathematicalExpressionCalculator" xmlns:controls="clr-namespace:WpfMath.Controls;assembly=WpfMath"
         mc:Ignorable="d"
         Title="数学表达式计算器" Height="450" Width="800">
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="3*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="epTextBox" Margin="8,8,8,8" Padding="8" TextWrapping="Wrap" Grid.Column="1"/>
-        <Button x:Name="goBtn" Content="Go!" Margin="8,8,8,8" Padding="8" Grid.Column="2" Click="GoBtn_Click" IsDefault="True"/>
-        <TextBlock x:Name="resTextBlock" Margin="8,8,8,8" Padding="8" Grid.Row="2" Text="" TextWrapping="Wrap" Grid.ColumnSpan="2" Grid.Column="1"/>
-        <Separator Margin="8,0,8,0" Grid.Row="1" VerticalAlignment="Center" Grid.ColumnSpan="2" Grid.Column="1"/>
-        <Grid Grid.RowSpan="3">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="1*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="1*"/>
-            </Grid.RowDefinitions>
-            <ListBox x:Name="constraintListBox" Grid.ColumnSpan="3" Margin="8" Grid.Row="1" SelectionChanged="ConstraintListBox_SelectionChanged"/>
+        
+        <TextBox x:Name="InputTextBox" Margin="8,8,8,8" Padding="8" TextWrapping="Wrap" TextChanged="InputTextBox_TextChanged"/>
+        <Button x:Name="GoButton" Content="Go!" Margin="8,8,8,8" Padding="8" Grid.Column="1" Click="GoButton_Click" IsDefault="True"/>
+        <ScrollViewer Margin="8" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Grid.Row="1" Grid.ColumnSpan="2">
+            <controls:FormulaControl x:Name="InputFormula" SelectionBrush="LightBlue" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SnapsToDevicePixels="True" />
+        </ScrollViewer>
+
+        <Separator Margin="8" Grid.Row="2" Grid.ColumnSpan="2" />
+
+        <TextBlock x:Name="OutputTextBlock" Margin="8" Padding="8" Grid.Row="3" Text="" TextWrapping="Wrap" Grid.ColumnSpan="2"/>
+        <ScrollViewer Margin="8" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Grid.Row="4" Grid.ColumnSpan="2">
+            <controls:FormulaControl Name="OutputFormula" SelectionBrush="LightBlue" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SnapsToDevicePixels="True" />
+        </ScrollViewer>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.ColumnSpan="2">
             <Button x:Name="addConstraintBtn" Content="添加" HorizontalAlignment="Stretch" Margin="8" Padding="8" VerticalAlignment="Stretch" Click="AddConstraintBtn_Click"/>
             <Button x:Name="editConstraintBtn" Content="编辑" Grid.Column="1" Margin="8" Padding="8"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="EditConstraintBtn_Click" IsEnabled="False"/>
             <Button x:Name="removeConstraintBtn" Content="删除" Grid.Column="2" Margin="8" Padding="8"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="RemoveConstraintBtn_Click" IsEnabled="False"/>
-        </Grid>
-
+        </StackPanel>
+        <ListBox x:Name="constraintListBox" Grid.Row="6" Grid.ColumnSpan="2" Margin="8" SelectionChanged="ConstraintListBox_SelectionChanged"/>
     </Grid>
 </Window>
