@@ -65,7 +65,7 @@ namespace MathematicalExpressionCalculator
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as UnitMonomial);
+            return Equals(obj as Polynomial);
         }
 
         public bool Equals(Polynomial other)

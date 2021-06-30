@@ -82,6 +82,13 @@ namespace MathematicalExpressionCalculator
                     return new RationalNumber(Numerator / gcd, Denominator / gcd, Sign);
             }
         }
+        public RationalNumber Reciprocal
+        {
+            get
+            {
+                return new RationalNumber(Denominator, Numerator, Sign);
+            }
+        }
         public bool IsZero { get => Sign == 0; }
         public bool IsOne { get => Sign == 1 && Numerator == Denominator; }
         public bool IsMinusOne { get => Sign == -1 && Numerator == Denominator; }
@@ -160,6 +167,24 @@ namespace MathematicalExpressionCalculator
             if (y.IsZero)
                 throw new DivideByZeroException();
             return new RationalNumber(x.Numerator * y.Denominator, x.Denominator * y.Numerator, x.Sign * y.Sign).Simplified;
+        }
+        public RationalNumber Power(BigInteger pow)
+        {
+            if (pow.Sign < 0)
+                return Reciprocal.Power(-pow);
+
+            var that = this;
+            var ans = new RationalNumber(1);
+            while (pow > 0)
+            {
+                if (pow % 2 == 1)
+                {
+                    ans *= that;
+                }
+                pow /= 2;
+                that *= that;
+            }
+            return ans;
         }
 
         public static bool operator ==(RationalNumber left, RationalNumber right)

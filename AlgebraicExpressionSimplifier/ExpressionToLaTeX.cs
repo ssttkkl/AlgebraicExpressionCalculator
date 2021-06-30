@@ -39,11 +39,11 @@ namespace MathematicalExpressionCalculator
                 if (sb.Length > 0 && item.Value.Sign > 0)
                     sb.Append("+");
                 if (item.Key.Count == 0)
-                    sb.Append(item.Value);
+                    sb.Append(item.Value.ToLaTeX());
                 else if (item.Value.IsMinusOne)
                     sb.Append("-");
                 else if (!item.Value.IsOne)
-                    sb.Append(item.Value);
+                    sb.Append(item.Value.ToLaTeX());
                 foreach (var item2 in item.Key)
                 {
                     sb.Append(item2.Key.ToString());
@@ -106,15 +106,11 @@ namespace MathematicalExpressionCalculator
                     sb.Append(")");
                 }
 
-                // 右操作数是单项式且系数不为1时加上乘号
-                if (tree.Right is Polynomial poly22 && poly22.Count == 1 && !poly22.Single().Value.IsOne)
-                {
-                    sb.Append(" \\times ");
-                }
-
                 if ((tree.Right is Polynomial poly2 && poly2.Count == 1) ||
                     (tree.Right is ExpressionTree tree2 && (tree2.Operation == Operation.Times || tree2.Operation == Operation.Divide || tree2.Operation == Operation.Power)))
                 {
+                    if (str2.Length > 0 && char.IsDigit(str2[0]))
+                        sb.Append(" \\times ");
                     sb.Append(str2);
                 }
                 else
@@ -134,21 +130,33 @@ namespace MathematicalExpressionCalculator
             }
             else if (tree.Operation == Operation.Power)
             {
-                if (tree.Left is Polynomial poly1 && (poly1.IsSymbol || poly1.IsNumber))
+                if (tree.Right is Polynomial poly2 && poly2.TryGetAsNumber(out var num) && num.Numerator == 1)
                 {
-                    sb.Append(str1);
+                    sb.Append("\\sqrt");
+                    if(num.Denominator != 2)
+                    {
+                        sb.Append($"[{num.Denominator}]");
+                    }
+                    sb.Append($"{{{str2}}}");
                 }
                 else
                 {
-                    sb.Append("(");
-                    sb.Append(str1);
-                    sb.Append(")");
-                }
+                    if (tree.Left is Polynomial poly1 && (poly1.IsSymbol || poly1.IsNumber))
+                    {
+                        sb.Append(str1);
+                    }
+                    else
+                    {
+                        sb.Append("(");
+                        sb.Append(str1);
+                        sb.Append(")");
+                    }
 
-                sb.Append("^");
-                sb.Append("{");
-                sb.Append(str2);
-                sb.Append("}");
+                    sb.Append("^");
+                    sb.Append("{");
+                    sb.Append(str2);
+                    sb.Append("}");
+                }
             }
             return sb.ToString();
         }

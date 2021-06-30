@@ -79,15 +79,11 @@ namespace MathematicalExpressionCalculator
                     sb.Append(")");
                 }
 
-                // 右操作数是单项式且系数不为1时加上乘号
-                if (Right is Polynomial poly22 && poly22.Count == 1 && !poly22.Single().Value.IsOne)
-                {
-                    sb.Append("*");
-                }
-
                 if ((Right is Polynomial poly2 && poly2.Count == 1) ||
                     (Right is ExpressionTree tree2 && (tree2.Operation == Operation.Times || tree2.Operation == Operation.Divide || tree2.Operation == Operation.Power)))
                 {
+                    if (str2.Length > 0 && char.IsDigit(str2[0]))
+                        sb.Append("*");
                     sb.Append(str2);
                 }
                 else

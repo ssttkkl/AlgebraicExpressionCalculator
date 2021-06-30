@@ -106,6 +106,16 @@ namespace MathematicalExpressionCalculator
             return mono;
         }
 
+        public UnitMonomial Power(RationalNumber pow)
+        {
+            var mono = new UnitMonomial(this);
+            foreach (var key in mono.Keys.ToArray())
+            {
+                mono[key] *= pow;
+            }
+            return mono;
+        }
+
         public UnitMonomial Reciprocal()
         {
             var mono = new UnitMonomial(this);
