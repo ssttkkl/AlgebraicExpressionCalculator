@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MathematicalExpressionCalculator
 {
-    public class UnitMonomial : SortedDictionary<Symbol, RationalNumber>, IEquatable<UnitMonomial>, IExpressionContextHolder<UnitMonomial>
+    public class UnitMonomial : SortedDictionary<Symbol, RationalNumber>, IEquatable<UnitMonomial>, IExpressionContextHolder<UnitMonomial>, IComparable<UnitMonomial>
     {
         public ExpressionContext Context { get; }
 
@@ -152,6 +153,19 @@ namespace MathematicalExpressionCalculator
             var item = this.Single();
             symbol = item.Key;
             return item.Value == 1;
+        }
+
+        public int CompareTo([AllowNull] UnitMonomial other)
+        {
+            foreach (var sy in Context.Symbols)
+            {
+                RationalNumber p = 0, q = 0;
+                TryGetValue(sy, out p);
+                other.TryGetValue(sy, out q);
+                if (p != q)
+                    return p.CompareTo(q);
+            }
+            return 0;
         }
     }
 }

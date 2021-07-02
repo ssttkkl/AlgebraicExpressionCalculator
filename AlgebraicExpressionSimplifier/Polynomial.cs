@@ -6,7 +6,7 @@ using System.Numerics;
 
 namespace MathematicalExpressionCalculator
 {
-    public class Polynomial : Dictionary<UnitMonomial, RationalNumber>, IExpression, IEquatable<Polynomial>, IExpressionContextHolder<Polynomial>
+    public class Polynomial : SortedDictionary<UnitMonomial, RationalNumber>, IExpression, IEquatable<Polynomial>, IExpressionContextHolder<Polynomial>
     {
         public ExpressionContext Context { get; }
 
