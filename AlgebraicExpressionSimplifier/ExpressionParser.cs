@@ -147,7 +147,7 @@ namespace MathematicalExpressionCalculator
                     if (c == '+' || c == '-' || c == '*' || c == '/' || c == '^') // 算符
                     {
                         // 若-是负号而不是算符
-                        if (c == '-' && (list.Count == 0 || (list[^1].Item2 != 0 && list[^1].Item2 != 1)))
+                        if (c == '-' && (list.Count == 0 || (list[^1].Item2 != 0 && list[^1].Item2 != 1 && list[^1].Item2 != 3)))
                         {
                             list.Add(("-1", 0));
                             list.Add(("*", 2));

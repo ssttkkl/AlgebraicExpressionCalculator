@@ -109,6 +109,9 @@ namespace MathematicalExpressionCalculator
 
         public override string ToString()
         {
+            if (Count == 0)
+                return "0";
+            
             var sb = new StringBuilder();
             foreach (var item in this)
             {

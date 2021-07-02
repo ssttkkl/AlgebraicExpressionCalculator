@@ -130,5 +130,10 @@ namespace MathematicalExpressionCalculator
                 InputTextBox.Foreground = Brushes.OrangeRed;
             }
         }
+
+        private void CopyButton_Click(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(OutputTextBlock.Text);
+        }
     }
 }

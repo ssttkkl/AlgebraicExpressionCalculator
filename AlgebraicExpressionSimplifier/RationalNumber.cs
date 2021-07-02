@@ -214,8 +214,8 @@ namespace MathematicalExpressionCalculator
                 return Sign switch
                 {
                     0 => "0",
-                    1 => $"({Numerator}/{Denominator})",
-                    -1 => $"(-{Numerator}/{Denominator})",
+                    1 => $"{Numerator}/{Denominator}",
+                    -1 => $"-{Numerator}/{Denominator}",
                     _ => throw new InvalidOperationException("Sign must be 0, 1 or -1"),
                 };
             }

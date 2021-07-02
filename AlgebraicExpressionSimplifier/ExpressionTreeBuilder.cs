@@ -23,15 +23,19 @@ namespace MathematicalExpressionCalculator
         }
         private static IExpression EnsureTree(this Polynomial t)
         {
-            // 若该多项式只有一个元素（数或变量），则返回值仍为Polynomial类型
-            Polynomial poly = new Polynomial(t);
-            if (poly.Count == 1)
+            // 若该多项式只有零或一个元素（数或变量），则返回值仍为Polynomial类型
+            if (t.Count == 0)
             {
-                var item = poly.Single();
+                return t;
+            }
+            else if (t.Count == 1)
+            {
+                var item = t.Single();
                 return EnsureTree(item.Value, item.Key);
             }
             else
             {
+                Polynomial poly = new Polynomial(t);
                 var item = poly.First();
                 poly.Remove(item.Key);
                 var ep1 = EnsureTree(item.Value, item.Key);
