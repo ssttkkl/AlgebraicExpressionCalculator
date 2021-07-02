@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MathematicalExpressionCalculator"
+        xmlns:local="clr-namespace:MathematicalExpressionCalculator" xmlns:controls="clr-namespace:WpfMath.Controls;assembly=WpfMath"
         mc:Ignorable="d"
-        Title="变量赋值" Height="200" Width="400">
+        Title="变量赋值" Height="300" Width="400">
     <DockPanel Margin="8">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button x:Name="okBtn" Margin="8" Padding="16,8" Click="OkBtn_Click" IsDefault="True">确定</Button>
@@ -15,6 +15,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -22,9 +23,11 @@
             </Grid.ColumnDefinitions>
             <Label Content="变量名" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
             <Label Content="变量值" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="1"/>
-            <TextBox x:Name="syNameTextBox" HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1" Margin="8" VerticalContentAlignment="Center"/>
-            <TextBox x:Name="syValueTextBox" HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1" Grid.Row="1" Margin="8" VerticalContentAlignment="Center"/>
-
+            <TextBox x:Name="NameTextBox" HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1" Margin="8" VerticalContentAlignment="Center"/>
+            <TextBox x:Name="ValueTextBox" HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1" Grid.Row="1" Margin="8" VerticalContentAlignment="Center" TextChanged="syValueTextBox_TextChanged"/>
+            <ScrollViewer Margin="8" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Grid.Row="2" Grid.Column="1">
+                <controls:FormulaControl x:Name="InputFormula" SelectionBrush="LightBlue" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SnapsToDevicePixels="True" MinHeight="40" />
+            </ScrollViewer>
         </Grid>
     </DockPanel>
 </Window>

@@ -27,12 +27,12 @@ namespace MathematicalExpressionCalculator
         public EditAssignmentWindow(string symbolName, string symbolValue)
         {
             InitializeComponent();
-            syNameTextBox.Text = SymbolName = symbolName;
-            syValueTextBox.Text = SymbolValue = symbolValue;
+            NameTextBox.Text = SymbolName = symbolName;
+            ValueTextBox.Text = SymbolValue = symbolValue;
         }
         private bool CheckSymbolName(string name)
         {
-            return syNameTextBox.Text.Trim().Length == 0;
+            return NameTextBox.Text.Trim().Length == 0;
         }
         private bool ParseExpression(string value, out IExpression ep)
         {
@@ -49,14 +49,14 @@ namespace MathematicalExpressionCalculator
         }
         private void OkBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (CheckSymbolName(syNameTextBox.Text))
+            if (CheckSymbolName(NameTextBox.Text))
             {
                 MessageBox.Show($"请输入变量名",
                         "错误",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
             }
-            else if (!ParseExpression(syValueTextBox.Text, out var ep))
+            else if (!ParseExpression(ValueTextBox.Text, out var ep))
             {
                 MessageBox.Show($"请输入合法的变量值",
                         "错误",
@@ -65,8 +65,8 @@ namespace MathematicalExpressionCalculator
             }
             else
             {
-                SymbolName = syNameTextBox.Text;
-                SymbolValue = syValueTextBox.Text;
+                SymbolName = NameTextBox.Text;
+                SymbolValue = ValueTextBox.Text;
                 DialogResult = true;
             }
         }
@@ -74,6 +74,23 @@ namespace MathematicalExpressionCalculator
         private void CancelBtn_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
+        }
+
+        private void syValueTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                ExpressionContext context = new ExpressionContext();
+                IExpression ep = ExpressionParser.Parse(ValueTextBox.Text, context);
+                InputFormula.Formula = ep.ToLaTeX();
+                ValueTextBox.FontWeight = FontWeights.Normal;
+                ValueTextBox.Foreground = Brushes.Black;
+            }
+            catch
+            {
+                ValueTextBox.FontWeight = FontWeights.Heavy;
+                ValueTextBox.Foreground = Brushes.OrangeRed;
+            }
         }
     }
 }
