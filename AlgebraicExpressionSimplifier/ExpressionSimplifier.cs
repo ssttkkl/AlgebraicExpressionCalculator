@@ -54,10 +54,6 @@ namespace MathematicalExpressionCalculator
                         return ep1 / num * new Polynomial(1, mono.Reciprocal());
                     else // 代换
                     {
-                        //ExpressionTree subb = new ExpressionTree(ep1, Operation.Divide, ep2, context);
-                        //Symbol syy = tr.Context.Symbol(subb.ToString());
-                        //substitution[syy] = subb;
-                        //return new Polynomial(syy, 1);
                         var subb = ep2;
                         var syy = context.Symbol(subb.ToString());
                         substitution[syy] = subb;
@@ -71,13 +67,9 @@ namespace MathematicalExpressionCalculator
                         else if (ep1.TryGetAsMonomial(out var coef, out var mono)) // 幂为其他数字，底为单项式
                         {
                             if (coef.IsOne) // 单项式系数为1
-                            {
                                 return new Polynomial(1, mono.Power(num));
-                            }    
                             else if (num.IsInteger) // 幂为负整数
-                            {
                                 return new Polynomial(coef.Power((BigInteger)num), mono.Power(num));
-                            }
                             else if (mono.Count == 0) // 幂为分数，底为数字
                             {
                                 ExpressionTree subb = new ExpressionTree(ep1, Operation.Power, ep2, context);
@@ -97,8 +89,17 @@ namespace MathematicalExpressionCalculator
                         }
                     }
 
-                    // 代换
-                    ExpressionTree sub = new ExpressionTree(ep1, Operation.Power, ep2, context);
+                    ExpressionTree sub;
+                    if (ep1.TryGetAsSymbol(out var sy1) && substitution.TryGetValue(sy1, out var sub1) &&
+                        sub1 is ExpressionTree tree1 && tree1.Operation == Operation.Power) // 若底也是由幂运算代换而来
+                    {
+                        sub = new ExpressionTree(tree1.Left, Operation.Power, (Polynomial)tree1.Right * ep2, context); // 凡是幂运算代换，右操作数都是Polynomial
+                    }
+                    else
+                    {
+                        sub = new ExpressionTree(ep1, Operation.Power, ep2, context);
+                    }
+
                     Symbol sy = context.Symbol(sub.ToString());
                     substitution[sy] = sub;
                     return new Polynomial(sy, 1);
