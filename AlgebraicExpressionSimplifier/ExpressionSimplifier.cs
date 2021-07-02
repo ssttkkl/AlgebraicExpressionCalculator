@@ -36,76 +36,90 @@ namespace MathematicalExpressionCalculator
                 return poly;
 
             var tr = (ExpressionTree)ep;
-            Polynomial ep1 = Polynomialize(tr.Left, context, substitution);
-            Polynomial ep2 = Polynomialize(tr.Right, context, substitution);
 
-            switch (tr.Operation)
+            if (tr.Operation == Operation.Plus)
             {
-                case Operation.Plus:
-                    return ep1 + ep2;
-                case Operation.Minus:
-                    return ep1 - ep2;
-                case Operation.Times:
-                    return ep1 * ep2;
-                case Operation.Divide:
-                    if (ep2.TryGetAsNumber(out RationalNumber num)) // 除以数字
-                        return ep1 / num;
-                    else if (ep2.TryGetAsMonomial(out num, out UnitMonomial mono)) // 除以单项式（系数相除，变量幂数取相反数后相乘）
-                        return ep1 / num * new Polynomial(1, mono.Reciprocal());
-                    else // 代换
+                Polynomial ep1 = Polynomialize(tr.Left, context, substitution);
+                Polynomial ep2 = Polynomialize(tr.Right, context, substitution);
+                return ep1 + ep2;
+            }
+            else if (tr.Operation == Operation.Minus)
+            {
+                Polynomial ep1 = Polynomialize(tr.Left, context, substitution);
+                Polynomial ep2 = Polynomialize(tr.Right, context, substitution);
+                return ep1 - ep2;
+            }
+            else if (tr.Operation == Operation.Times)
+            {
+                Polynomial ep1 = Polynomialize(tr.Left, context, substitution);
+                Polynomial ep2 = Polynomialize(tr.Right, context, substitution);
+                return ep1 * ep2;
+            }
+            else if (tr.Operation == Operation.Divide)
+            {
+                Polynomial ep1 = Polynomialize(tr.Left, context, substitution);
+                Polynomial ep2 = Polynomialize(tr.Right, context, substitution);
+                if (ep2.TryGetAsNumber(out var num)) // 除以数字
+                    return ep1 / num;
+                else if (ep2.TryGetAsMonomial(out num, out UnitMonomial mono)) // 除以单项式（系数相除，变量幂数取相反数后相乘）
+                    return ep1 / num * new Polynomial(1, mono.Reciprocal());
+                else // 代换
+                {
+                    var subb = ep2;
+                    var syy = context.Symbol(subb.ToString());
+                    substitution[syy] = subb;
+                    return ep1 * new Polynomial(syy, -1);
+                }
+            }
+            else if (tr.Operation == Operation.Power)
+            {
+                if (tr.Left is ExpressionTree tree1 && tree1.Operation == Operation.Power) // 若底也是幂运算，把两个指数相乘后递归处理
+                {
+                    Polynomial epLR = Polynomialize(tree1.Right, context, substitution);
+                    Polynomial epR = Polynomialize(tr.Right, context, substitution);
+
+                    ExpressionTree merged = new ExpressionTree(tree1.Left, Operation.Power, epLR * epR, context);
+                    return Polynomialize(merged, context, substitution);
+                }
+
+                Polynomial ep1 = Polynomialize(tr.Left, context, substitution);
+                Polynomial ep2 = Polynomialize(tr.Right, context, substitution);
+                if (ep2.TryGetAsNumber(out var num)) // 若幂为数字
+                {
+                    if (num.Sign > 0 && num.IsInteger) // 幂为正整数
+                        return ep1.Power((BigInteger)num);
+                    else if (ep1.TryGetAsMonomial(out var coef, out var mono)) // 幂为其他数字，底为单项式
                     {
-                        var subb = ep2;
-                        var syy = context.Symbol(subb.ToString());
-                        substitution[syy] = subb;
-                        return ep1 * new Polynomial(syy, -1);
-                    }
-                case Operation.Power:
-                    if (ep2.TryGetAsNumber(out num))
-                    {
-                        if (num.Sign > 0 && num.IsInteger) // 幂为正整数
-                            return ep1.Power((BigInteger)num);
-                        else if (ep1.TryGetAsMonomial(out var coef, out var mono)) // 幂为其他数字，底为单项式
+                        if (coef.IsOne) // 单项式系数为1
+                            return new Polynomial(1, mono.Power(num));
+                        else if (num.IsInteger) // 幂为（负）整数
+                            return new Polynomial(coef.Power((BigInteger)num), mono.Power(num));
+                        else if (mono.Count == 0) // 幂为分数，底为数字，代换
                         {
-                            if (coef.IsOne) // 单项式系数为1
-                                return new Polynomial(1, mono.Power(num));
-                            else if (num.IsInteger) // 幂为负整数
-                                return new Polynomial(coef.Power((BigInteger)num), mono.Power(num));
-                            else if (mono.Count == 0) // 幂为分数，底为数字
-                            {
-                                ExpressionTree subb = new ExpressionTree(ep1, Operation.Power, ep2, context);
-                                Symbol syy = context.Symbol(subb.ToString());
-                                substitution[syy] = subb;
-                                return new Polynomial(syy, 1);
-                            }
-                            else
-                            {
-                                var ep11 = new ExpressionTree(new Polynomial(coef, context), Operation.Power, ep2, context);
-                                var ep22 = new Polynomial(1, mono.Power(num));
-                                ExpressionTree subb = new ExpressionTree(ep11, Operation.Times, ep22, context);
-                                Symbol syy = context.Symbol(subb.ToString());
-                                substitution[syy] = subb;
-                                return new Polynomial(syy, 1);
-                            }
+                            ExpressionTree subb = new ExpressionTree(ep1, Operation.Power, ep2, context);
+                            Symbol syy = context.Symbol(subb.ToString());
+                            substitution[syy] = subb;
+                            return new Polynomial(syy, 1);
+                        }
+                        else // 幂为分数，幂代换，底乘方
+                        {
+                            var ep11 = new ExpressionTree(new Polynomial(coef, context), Operation.Power, ep2, context);
+                            var ep22 = new Polynomial(1, mono.Power(num));
+                            ExpressionTree subb = new ExpressionTree(ep11, Operation.Times, ep22, context);
+                            Symbol syy = context.Symbol(subb.ToString());
+                            substitution[syy] = subb;
+                            return new Polynomial(syy, 1);
                         }
                     }
+                }
 
-                    ExpressionTree sub;
-                    if (ep1.TryGetAsSymbol(out var sy1) && substitution.TryGetValue(sy1, out var sub1) &&
-                        sub1 is ExpressionTree tree1 && tree1.Operation == Operation.Power) // 若底也是由幂运算代换而来
-                    {
-                        sub = new ExpressionTree(tree1.Left, Operation.Power, (Polynomial)tree1.Right * ep2, context); // 凡是幂运算代换，右操作数都是Polynomial
-                    }
-                    else
-                    {
-                        sub = new ExpressionTree(ep1, Operation.Power, ep2, context);
-                    }
-
-                    Symbol sy = context.Symbol(sub.ToString());
-                    substitution[sy] = sub;
-                    return new Polynomial(sy, 1);
-                default:
-                    throw new NotImplementedException();
+                ExpressionTree sub = new ExpressionTree(ep1, Operation.Power, ep2, context);
+                Symbol sy = context.Symbol(sub.ToString());
+                substitution[sy] = sub;
+                return new Polynomial(sy, 1);
             }
+
+            throw new NotSupportedException();
         }
         private static Polynomial MergePolynomial(Polynomial poly, IDictionary<Symbol, IExpression> substitution)
         {
@@ -159,7 +173,7 @@ namespace MathematicalExpressionCalculator
                     if (item2.Value.Count != 0)
                     {
                         var ep1 = item2.Key;
-                        var ep2 = item2.Value; 
+                        var ep2 = item2.Value;
 
                         if (ep2.TryGetAsNumber(out var num))
                         {
