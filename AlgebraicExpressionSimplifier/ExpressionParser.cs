@@ -32,7 +32,7 @@ namespace MathematicalExpressionCalculator
 
             // 头尾加上括号
             ops.Push("(");
-            elements.Add((")", 3));
+            elements.Add((")", 4));
 
             foreach ((string, int) ele in elements)
             {
@@ -85,43 +85,46 @@ namespace MathematicalExpressionCalculator
                         }
                         ops.Push(ele.Item1);
                         break;
-                    case 3: // 括号
-                        if (ele.Item1 == "(")
-                            ops.Push("(");
-                        else if (ele.Item1 == ")")
+                    case 3: // 左括号
+                        ops.Push("(");
+                        break;
+                    case 4: // 右括号
+                        while (ops.Peek() != "(")
                         {
-                            while (ops.Peek() != "(")
+                            IExpression ep2 = eps.Pop();
+                            IExpression ep1 = eps.Pop();
+                            switch (ops.Pop())
                             {
-                                IExpression ep2 = eps.Pop();
-                                IExpression ep1 = eps.Pop();
-                                switch (ops.Pop())
-                                {
-                                    case "+":
-                                        eps.Push(new ExpressionTree(ep1, Operation.Plus, ep2, context));
-                                        break;
-                                    case "-":
-                                        eps.Push(new ExpressionTree(ep1, Operation.Minus, ep2, context));
-                                        break;
-                                    case "*":
-                                        eps.Push(new ExpressionTree(ep1, Operation.Times, ep2, context));
-                                        break;
-                                    case "/":
-                                        eps.Push(new ExpressionTree(ep1, Operation.Divide, ep2, context));
-                                        break;
-                                    case "^":
-                                        eps.Push(new ExpressionTree(ep1, Operation.Power, ep2, context));
-                                        break;
-                                    default:
-                                        throw new ArgumentException();
-                                }
+                                case "+":
+                                    eps.Push(new ExpressionTree(ep1, Operation.Plus, ep2, context));
+                                    break;
+                                case "-":
+                                    eps.Push(new ExpressionTree(ep1, Operation.Minus, ep2, context));
+                                    break;
+                                case "*":
+                                    eps.Push(new ExpressionTree(ep1, Operation.Times, ep2, context));
+                                    break;
+                                case "/":
+                                    eps.Push(new ExpressionTree(ep1, Operation.Divide, ep2, context));
+                                    break;
+                                case "^":
+                                    eps.Push(new ExpressionTree(ep1, Operation.Power, ep2, context));
+                                    break;
+                                default:
+                                    throw new ArgumentException();
                             }
-                            ops.Pop(); // 弹出左括号
                         }
+                        ops.Pop(); // 弹出左括号
                         break;
                 }
             }
 
-            return eps.Count == 1 ? eps.Peek() : throw new ArgumentException("表达式不合法");
+            if (eps.Count == 0)
+                return new Polynomial(context);
+            else if (eps.Count == 1)
+                return eps.Peek();
+            else
+                throw new ArgumentException("表达式不合法");
         }
 
         private static List<(string, int)> SplitText(string text)
@@ -147,7 +150,7 @@ namespace MathematicalExpressionCalculator
                     if (c == '+' || c == '-' || c == '*' || c == '/' || c == '^') // 算符
                     {
                         // 若-是负号而不是算符
-                        if (c == '-' && (list.Count == 0 || (list[^1].Item2 != 0 && list[^1].Item2 != 1 && list[^1].Item2 != 3)))
+                        if (c == '-' && (list.Count == 0 || (list[^1].Item2 != 0 && list[^1].Item2 != 1 && list[^1].Item2 != 4)))
                         {
                             list.Add(("-1", 0));
                             list.Add(("*", 2));
@@ -160,7 +163,7 @@ namespace MathematicalExpressionCalculator
                     else if (c == '(') // 左括号
                     {
                         // 若两个元素间省略了乘号
-                        if (list.Count > 0 && (list[^1].Item2 == 0 || list[^1].Item2 == 1 || list[^1].Item1 == ")"))
+                        if (list.Count > 0 && (list[^1].Item2 == 0 || list[^1].Item2 == 1 || list[^1].Item2 == 4))
                         {
                             list.Add(("*", 2));
                         }
@@ -168,12 +171,12 @@ namespace MathematicalExpressionCalculator
                     }
                     else if (c == ')') // 右括号
                     {
-                        list.Add((")", 3));
+                        list.Add((")", 4));
                     }
                     else if (c == '{') // 大括号包裹的变量名
                     {
                         // 若两个元素间省略了乘号
-                        if (list.Count > 0 && (list[^1].Item2 == 0 || list[^1].Item2 == 1 || list[^1].Item1 == ")"))
+                        if (list.Count > 0 && (list[^1].Item2 == 0 || list[^1].Item2 == 1 || list[^1].Item2 == 4))
                         {
                             list.Add(("*", 2));
                         }
@@ -189,7 +192,7 @@ namespace MathematicalExpressionCalculator
                     else // 单个字母视为变量名
                     {
                         // 若两个元素间省略了乘号
-                        if (list.Count > 0 && (list[^1].Item2 == 0 || list[^1].Item2 == 1 || list[^1].Item1 == ")"))
+                        if (list.Count > 0 && (list[^1].Item2 == 0 || list[^1].Item2 == 1 || list[^1].Item2 == 4))
                         {
                             list.Add(("*", 2));
                         }
