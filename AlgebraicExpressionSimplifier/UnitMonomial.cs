@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace MathematicalExpressionCalculator
 {
-    public class UnitMonomial : SortedDictionary<Symbol, RationalNumber>, IEquatable<UnitMonomial>, IExpressionContextHolder<UnitMonomial>, IComparable<UnitMonomial>
+    public class UnitMonomial : Dictionary<Symbol, RationalNumber>, IEquatable<UnitMonomial>, IExpressionContextHolder<UnitMonomial>, IComparable<UnitMonomial>
     {
         public ExpressionContext Context { get; }
 
@@ -54,17 +54,12 @@ namespace MathematicalExpressionCalculator
 
         public bool Equals(UnitMonomial other)
         {
-            if (other == null)
+            if (other == null || Count != other.Count)
                 return false;
 
             foreach (var item in this)
             {
-                if (other[item.Key] != item.Value)
-                    return false;
-            }
-            foreach (var item in other)
-            {
-                if (this[item.Key] != item.Value)
+                if (!other.TryGetValue(item.Key, out var val) || val != item.Value)
                     return false;
             }
             return true;
@@ -72,18 +67,17 @@ namespace MathematicalExpressionCalculator
 
         public override int GetHashCode()
         {
-            var hash = new HashCode();
+            int hash = 0;
             foreach (var item in this)
             {
-                hash.Add(item.Key);
-                hash.Add(item.Value);
+                hash ^= HashCode.Combine(item.Key, item.Value);
             }
-            return hash.ToHashCode();
+            return hash;
         }
 
         public static bool operator ==(UnitMonomial left, UnitMonomial right)
         {
-            return EqualityComparer<UnitMonomial>.Default.Equals(left, right); ;
+            return EqualityComparer<UnitMonomial>.Default.Equals(left, right);
         }
 
         public static bool operator !=(UnitMonomial left, UnitMonomial right)
@@ -199,7 +193,10 @@ namespace MathematicalExpressionCalculator
 
         public int CompareTo([AllowNull] UnitMonomial other)
         {
-            foreach (var sy in Context.Symbols)
+            if (other == null)
+                return 1;
+            var join = Join(other);
+            foreach (var sy in join.Keys)
             {
                 RationalNumber p = 0, q = 0;
                 TryGetValue(sy, out p);

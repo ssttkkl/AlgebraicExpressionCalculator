@@ -127,7 +127,8 @@ namespace MathematicalExpressionCalculator
             }
             else if (tree.Operation == Operation.Power)
             {
-                if (tree.Right is Polynomial poly2 && poly2.TryGetAsNumber(out var num) && num.Numerator == 1)
+                // 若指数为1/x, x>=2，则用根式形式
+                if (tree.Right is Polynomial poly2 && poly2.TryGetAsNumber(out var num) && num.Numerator == 1 && num.Denominator > 1)
                 {
                     sb.Append("\\sqrt");
                     if(num.Denominator != 2)
