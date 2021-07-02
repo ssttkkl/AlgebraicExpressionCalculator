@@ -238,6 +238,19 @@ namespace MathematicalExpressionCalculator
             return poly;
         }
 
+        public static Polynomial operator *(Polynomial x, UnitMonomial y)
+        {
+            if (x.Context != y.Context)
+                throw new DifferentContextException();
+
+            var poly = new Polynomial(x.Context);
+            foreach (var item in x)
+            {
+                poly[item.Key * y] = item.Value;
+            }
+            return poly;
+        }
+
         public static Polynomial operator /(Polynomial x, RationalNumber y)
         {
             if (y.IsZero)
@@ -246,6 +259,19 @@ namespace MathematicalExpressionCalculator
             foreach (var key in x.Keys)
             {
                 poly[key] /= y;
+            }
+            return poly;
+        }
+
+        public static Polynomial operator /(Polynomial x, UnitMonomial y)
+        {
+            if (x.Context != y.Context)
+                throw new DifferentContextException();
+
+            var poly = new Polynomial(x.Context);
+            foreach (var item in x)
+            {
+                poly[item.Key / y] = item.Value;
             }
             return poly;
         }
@@ -265,6 +291,5 @@ namespace MathematicalExpressionCalculator
             }
             return ans;
         }
-
     }
 }

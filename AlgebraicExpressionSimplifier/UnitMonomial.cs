@@ -106,6 +106,21 @@ namespace MathematicalExpressionCalculator
             mono.Trim();
             return mono;
         }
+        public static UnitMonomial operator /(UnitMonomial x, UnitMonomial y)
+        {
+            if (x.Context != y.Context)
+                throw new DifferentContextException();
+
+            var mono = new UnitMonomial(x);
+            foreach (var item in y)
+            {
+                if (!mono.TryGetValue(item.Key, out RationalNumber val))
+                    val = 0;
+                mono[item.Key] = val - item.Value;
+            }
+            mono.Trim();
+            return mono;
+        }
 
         public UnitMonomial Power(RationalNumber pow)
         {
@@ -123,6 +138,33 @@ namespace MathematicalExpressionCalculator
             foreach(var key in Keys)
             {
                 mono[key] = -mono[key];
+            }
+            return mono;
+        }
+
+        public UnitMonomial Intersect(UnitMonomial other)
+        {
+            if (Context != other.Context)
+                throw new DifferentContextException();
+
+            UnitMonomial mono = new UnitMonomial(Context);
+            foreach (var item in this)
+            {
+                if (other.TryGetValue(item.Key, out var pow))
+                    mono[item.Key] = pow < item.Value ? pow : item.Value;
+            }
+            return mono;
+        }
+        public UnitMonomial Join(UnitMonomial other)
+        {
+            if (Context != other.Context)
+                throw new DifferentContextException();
+
+            UnitMonomial mono = new UnitMonomial(Context);
+            foreach (var item in this)
+            {
+                if (other.TryGetValue(item.Key, out var pow))
+                    mono[item.Key] = pow > item.Value ? pow : item.Value;
             }
             return mono;
         }
