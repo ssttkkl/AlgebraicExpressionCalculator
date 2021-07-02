@@ -58,7 +58,7 @@ namespace MathematicalExpressionCalculator
             }
             else if (!ParseExpression(ValueTextBox.Text, out var ep))
             {
-                MessageBox.Show($"请输入合法的变量值",
+                MessageBox.Show($"请输入合法的变量值表达式",
                         "错误",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);

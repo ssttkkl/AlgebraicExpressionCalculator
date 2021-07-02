@@ -60,7 +60,7 @@ namespace MathematicalExpressionCalculator
             }
             catch (Exception exc)
             {
-                OutputTextBlock.Text = exc.Message + "\n" + exc.StackTrace;
+                OutputTextBlock.Text = exc.Message;
             }
         }
 

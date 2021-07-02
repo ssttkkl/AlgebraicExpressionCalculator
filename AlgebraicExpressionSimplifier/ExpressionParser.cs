@@ -18,7 +18,7 @@ namespace MathematicalExpressionCalculator
             else if (op == "(")
                 return 0;
             else
-                throw new ArgumentException($"Illegal Operator: {op}");
+                throw new ArgumentException();
         }
 
         public static IExpression Parse(string text, ExpressionContext context)
@@ -80,7 +80,7 @@ namespace MathematicalExpressionCalculator
                                     eps.Push(new ExpressionTree(ep1, Operation.Power, ep2, context));
                                     break;
                                 default:
-                                    throw new ArgumentException();
+                                    throw new NotSupportedException();
                             }
                         }
                         ops.Push(ele.Item1);
@@ -111,7 +111,7 @@ namespace MathematicalExpressionCalculator
                                     eps.Push(new ExpressionTree(ep1, Operation.Power, ep2, context));
                                     break;
                                 default:
-                                    throw new ArgumentException();
+                                    throw new NotSupportedException();
                             }
                         }
                         ops.Pop(); // 弹出左括号
@@ -149,8 +149,13 @@ namespace MathematicalExpressionCalculator
 
                     if (c == '+' || c == '-' || c == '*' || c == '/' || c == '^') // 算符
                     {
+                        // 若+是正号而不是算符
+                        if (c == '+' && (list.Count == 0 || (list[^1].Item2 != 0 && list[^1].Item2 != 1 && list[^1].Item2 != 4)))
+                        {
+                            // pass
+                        }
                         // 若-是负号而不是算符
-                        if (c == '-' && (list.Count == 0 || (list[^1].Item2 != 0 && list[^1].Item2 != 1 && list[^1].Item2 != 4)))
+                        else if (c == '-' && (list.Count == 0 || (list[^1].Item2 != 0 && list[^1].Item2 != 1 && list[^1].Item2 != 4)))
                         {
                             list.Add(("-1", 0));
                             list.Add(("*", 2));
@@ -188,6 +193,10 @@ namespace MathematicalExpressionCalculator
                         }
                         list.Add((text.Substring(i + 1, j - i - 1), 1));
                         i = j;
+                    }
+                    else if(c == '}')
+                    {
+                        throw new ArgumentException("存在无效的\'}\'");
                     }
                     else // 单个字母视为变量名
                     {
