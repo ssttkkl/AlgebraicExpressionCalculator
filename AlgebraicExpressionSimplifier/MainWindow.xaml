@@ -30,7 +30,7 @@
         <Separator Margin="8" Grid.Row="2" Grid.ColumnSpan="2" />
 
         <TextBlock x:Name="OutputTextBlock" Margin="8" Padding="8" Grid.Row="3" Text="" TextWrapping="Wrap"/>
-        <Button x:Name="CopyButton" Margin="8" Padding="8"  Grid.Row="3" Grid.Column="1" Content="复制" Click="CopyButton_Click"/>
+        <Button x:Name="CopyButton" Margin="8" Padding="8"  Grid.Row="3" Grid.RowSpan="2" Grid.Column="1" Content="复制" Click="CopyButton_Click"/>
         <ScrollViewer Margin="8" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Grid.Row="4" Grid.ColumnSpan="2">
             <controls:FormulaControl Name="OutputFormula" SelectionBrush="LightBlue" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SnapsToDevicePixels="True" ToolTip="{Binding Formula, ElementName=OutputFormula, Mode=OneWay}"/>
         </ScrollViewer>
