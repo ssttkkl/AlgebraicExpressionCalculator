@@ -146,7 +146,7 @@ namespace MathematicalExpressionCalculator
                 }
 
                 Polynomial ep1 = Polynomialize(tr.Left, context, substitution);
-                if (ep1.TryGetAsNumber(out var num) && num.IsOne) // 若底数为0或1
+                if (ep1.TryGetAsNumber(out var num) && (num.IsOne || num.IsZero)) // 若底数为0或1
                     return new Polynomial(num, context);
 
                 Polynomial ep2 = Polynomialize(tr.Right, context, substitution);
@@ -218,11 +218,11 @@ namespace MathematicalExpressionCalculator
                         {
                             var syR = context.Symbol(tree.Right.ToString());
                             substitution[syR] = tree.Right;
-                            polyR = new Polynomial(syR, 1);
+                            polyR = new Polynomial(syR, 1) * new Polynomial(item2.Value, context);
                         }
                         else
                         {
-                            polyR = tree.Right as Polynomial;
+                            polyR = (tree.Right as Polynomial) * new Polynomial(item2.Value, context);
                         }
                     }
                     // 否则直接处理
@@ -284,8 +284,10 @@ namespace MathematicalExpressionCalculator
                 }
 
                 // 若分子只有一项或没有分母，则直接将分子加到总多项式
-                if (group.Key.Count == 0 || group.Count() == 1)
+                if (group.Key.Count == 0)
                     p += ep1;
+                else if (group.Count() == 1)
+                    p += ep1 * group.Key.Power(-1);
                 else
                 {
                     // 判断分母是否有与分子成比例的代换变量，若有则约去

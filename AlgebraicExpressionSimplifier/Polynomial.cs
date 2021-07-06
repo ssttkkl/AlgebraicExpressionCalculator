@@ -136,9 +136,14 @@ namespace MathematicalExpressionCalculator
             }
             return sb.ToString();
         }
-        public bool IsNumber => Count == 1 && this.Single().Key.Count == 0;
+        public bool IsNumber => Count == 0 || (Count == 1 && this.Single().Key.Count == 0);
         public bool TryGetAsNumber(out RationalNumber number)
         {
+            if (Count == 0)
+            {
+                number = 0;
+                return true;
+            }
             if (Count != 1)
             {
                 number = 0;
